@@ -616,6 +616,7 @@
     <Compile Include="OsTrader\Gui\TesterUi.xaml.cs">
       <DependentUpon>TesterUi.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Charts\CandleChart\Indicators\Tunnel.cs" />
     <Page Include="Alerts\AlertMessageFullUi.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
