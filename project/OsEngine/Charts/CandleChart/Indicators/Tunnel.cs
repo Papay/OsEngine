@@ -32,8 +32,8 @@ namespace OsEngine.Charts.CandleChart.Indicators
             CanDelete = canDelete;
 
             Values = new List<decimal>();
-            TunnelUp = new List<decimal>();
-            TunnelDown = new List<decimal>();
+            ValuesUp = new List<decimal>();
+            ValuesDown = new List<decimal>();
 
             Load();
         }
@@ -57,8 +57,8 @@ namespace OsEngine.Charts.CandleChart.Indicators
             CanDelete = canDelete;
 
             Values = new List<decimal>();
-            TunnelUp = new List<decimal>();
-            TunnelDown = new List<decimal>();
+            ValuesUp = new List<decimal>();
+            ValuesDown = new List<decimal>();
         }
 
         public IndicatorOneCandleChartType TypeIndicator { get; set; }
@@ -84,12 +84,12 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             get
             {
-                TunnelUp = Values.Select(v => decimal.Add(v, Width / (decimal)2)).ToList();
-                TunnelDown = Values.Select(v => decimal.Subtract(v, Width / (decimal)2)).ToList();
+                ValuesUp = Values.Select(v => decimal.Add(v, Width / (decimal)2)).ToList();
+                ValuesDown = Values.Select(v => decimal.Subtract(v, Width / (decimal)2)).ToList();
 
                 List<List<decimal>> list = new List<List<decimal>>();
-                list.Add(TunnelUp);
-                list.Add(TunnelDown);
+                list.Add(ValuesUp);
+                list.Add(ValuesDown);
                 return list;
             }
         }
@@ -128,17 +128,17 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// <summary>
         /// скользящая средняя
         /// </summary>
-        public List<decimal> Values { get; set; }
+        public List<decimal> Values { get; private set; }
 
         /// <summary>
         /// верхняя линия туннеля
         /// </summary>
-        public List<decimal> TunnelUp { get; set; }
+        public List<decimal> ValuesUp { get; private set; }
 
         /// <summary>
         /// нижняя линия туннеля
         /// </summary>
-        public List<decimal> TunnelDown { get; set; }
+        public List<decimal> ValuesDown { get; private set; }
 
         /// <summary>
         /// сохранить настройки в файл
@@ -215,8 +215,8 @@ namespace OsEngine.Charts.CandleChart.Indicators
             if (Values != null)
             {
                 Values.Clear();
-                TunnelUp.Clear();
-                TunnelDown.Clear();
+                ValuesUp.Clear();
+                ValuesDown.Clear();
             }
             _myCandles = null;
         }
