@@ -21,21 +21,17 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// <param name="canDelete">можно ли пользователю удалить индикатор с графика вручную</param>
         public Tunnel(string unqueName, bool canDelete)
         {
-            CanDelete = canDelete;
-            Name = unqueName;
-            TypeIndicator = IndicatorOneCandleChartType.Line;
-            TypePointsToSearch = PriceTypePoints.Close;
-            ColorBase = Color.DeepSkyBlue;
-            Lenght = 13;
-            Width = 34;
-            PaintOn = true;
-            CanDelete = canDelete;
+            this.CanDelete = canDelete;
+            this.Name = unqueName;
+            this.TypeIndicator = IndicatorOneCandleChartType.Line;
+            this.TypePointsToSearch = PriceTypePoints.Close;
+            this.ColorBase = Color.DeepSkyBlue;
+            this.Lenght = 100;
+            this.Width = 60;
+            this.PaintOn = true;
+            this.CanDelete = canDelete;
 
-            Values = new List<decimal>();
-            ValuesUp = new List<decimal>();
-            ValuesDown = new List<decimal>();
-
-            Load();
+            this.Load();
         }
 
         /// <summary>
@@ -46,19 +42,14 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// <param name="canDelete">можно ли пользователю удалить индикатор с графика вручную</param>
         public Tunnel(bool canDelete)
         {
-            CanDelete = canDelete;
-            Name = Guid.NewGuid().ToString();
-            TypeIndicator = IndicatorOneCandleChartType.Line;
-            TypePointsToSearch = PriceTypePoints.Close;
-            ColorBase = Color.DeepSkyBlue;
-            Lenght = 13;
-            Width = 34;
-            PaintOn = true;
-            CanDelete = canDelete;
-
-            Values = new List<decimal>();
-            ValuesUp = new List<decimal>();
-            ValuesDown = new List<decimal>();
+            this.CanDelete = canDelete;
+            this.Name = Guid.NewGuid().ToString();
+            this.TypeIndicator = IndicatorOneCandleChartType.Line;
+            this.TypePointsToSearch = PriceTypePoints.Close;
+            this.ColorBase = Color.DeepSkyBlue;
+            this.Lenght = 100;
+            this.Width = 60;
+            this.PaintOn = true;
         }
 
         public IndicatorOneCandleChartType TypeIndicator { get; set; }
@@ -84,12 +75,11 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             get
             {
-                ValuesUp = Values.Select(v => decimal.Add(v, Width / (decimal)2)).ToList();
-                ValuesDown = Values.Select(v => decimal.Subtract(v, Width / (decimal)2)).ToList();
-
-                List<List<decimal>> list = new List<List<decimal>>();
-                list.Add(ValuesUp);
-                list.Add(ValuesDown);
+                var list = new List<List<decimal>>
+                {
+                    ValuesUp,
+                    ValuesDown
+                };
                 return list;
             }
         }
@@ -212,13 +202,13 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// </summary>
         public void Clear()
         {
-            if (Values != null)
+            if (this.Values != null)
             {
-                Values.Clear();
-                ValuesUp.Clear();
-                ValuesDown.Clear();
+                this.Values.Clear();
+                this.ValuesUp.Clear();
+                this.ValuesDown.Clear();
             }
-            _myCandles = null;
+            this.myCandles = null;
         }
 
         public void ShowDialog()
@@ -234,19 +224,16 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
         public void Reload()
         {
-            if (_myValues != null)
+            if (this.myValues != null)
             {
-                ProcessAll(_myValues);
+                this.ProcessAll(this.myValues);
             }
-            if (_myCandles != null)
+            if (this.myCandles != null)
             {
-                ProcessAll(_myCandles);
+                this.ProcessAll(this.myCandles);
             }
 
-            if (NeadToReloadEvent != null)
-            {
-                NeadToReloadEvent(this);
-            }
+            this.NeadToReloadEvent?.Invoke(this);
         }
 
         public event Action<IIndicatorCandle> NeadToReloadEvent;
@@ -254,12 +241,12 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// <summary>
         /// свечи по которым строится индикатор
         /// </summary>
-        private List<decimal> _myValues;
+        private List<decimal> myValues;
 
         /// <summary>
         /// свечи по которым строится индикатор
         /// </summary>
-        private List<Candle> _myCandles;
+        private List<Candle> myCandles;
 
         /// <summary>
         /// прогрузить новыми свечками
@@ -270,20 +257,18 @@ namespace OsEngine.Charts.CandleChart.Indicators
             {
                 return;
             }
-            _myCandles = candles;
-            if (Values != null &&
-                Values.Count + 1 == candles.Count)
+            this.myCandles = candles;
+            if (this.Values?.Count + 1 == candles.Count)
             {
-                ProcessOne(candles);
+                this.ProcessOne(candles);
             }
-            else if (Values != null &&
-                     Values.Count == candles.Count)
+            else if (this.Values?.Count == candles.Count)
             {
-                ProcessLast(candles);
+                this.ProcessLast(candles);
             }
             else
             {
-                ProcessAll(candles);
+                this.ProcessAll(candles);
             }
         }
 
@@ -296,31 +281,30 @@ namespace OsEngine.Charts.CandleChart.Indicators
             {
                 return;
             }
-            if (Values == null)
+            if (this.Values == null)
             {
-                Values = new List<decimal>();
+                this.Values = new List<decimal>();
             }
 
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.Simple)
+            if (this.TypeCalculationAverage == MovingAverageTypeCalculation.Simple)
             {
-                Values.Add(GetValueSimple(candles, candles.Count - 1));
+                this.Values.Add(this.GetValueSimple(candles, candles.Count - 1));
             }
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.Exponential)
+            if (this.TypeCalculationAverage == MovingAverageTypeCalculation.Exponential)
             {
-                Values.Add(GetValueExponential(candles, candles.Count - 1));
+                this.Values.Add(this.GetValueExponential(candles, candles.Count - 1));
             }
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.Weighted)
+            if (this.TypeCalculationAverage == MovingAverageTypeCalculation.Weighted)
             {
-                Values.Add(GetValueWeighted(candles, candles.Count - 1));
+                this.Values.Add(this.GetValueWeighted(candles, candles.Count - 1));
             }
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.Radchenko)
+            if (this.TypeCalculationAverage == MovingAverageTypeCalculation.VolumeWeighted)
             {
-                Values.Add(GetValueRadchenko(Values, candles, candles.Count - 1));
+                this.Values.Add(this.GetValueVolumeWeighted(candles, candles.Count - 1));
             }
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.VolumeWeighted)
-            {
-                Values.Add(GetValueVolumeWeighted(candles, candles.Count - 1));
-            }
+
+            this.ValuesUp = this.Values.Select(v => decimal.Add(v, decimal.Multiply(this.Width, 0.5m))).ToList();
+            this.ValuesDown = this.Values.Select(v => decimal.Subtract(v, decimal.Multiply(this.Width, 0.5m))).ToList();
         }
 
         /// <summary>
@@ -332,31 +316,30 @@ namespace OsEngine.Charts.CandleChart.Indicators
             {
                 return;
             }
-            Values = new List<decimal>();
+            this.Values = new List<decimal>();
 
             for (int i = 0; i < candles.Count; i++)
             {
-                if (TypeCalculationAverage == MovingAverageTypeCalculation.Simple)
+                if (this.TypeCalculationAverage == MovingAverageTypeCalculation.Simple)
                 {
-                    Values.Add(GetValueSimple(candles, i));
+                    this.Values.Add(this.GetValueSimple(candles, i));
                 }
-                if (TypeCalculationAverage == MovingAverageTypeCalculation.Exponential)
+                if (this.TypeCalculationAverage == MovingAverageTypeCalculation.Exponential)
                 {
-                    Values.Add(GetValueExponential(candles, i));
+                    this.Values.Add(this.GetValueExponential(candles, i));
                 }
-                if (TypeCalculationAverage == MovingAverageTypeCalculation.Weighted)
+                if (this.TypeCalculationAverage == MovingAverageTypeCalculation.Weighted)
                 {
-                    Values.Add(GetValueWeighted(candles, i));
+                    this.Values.Add(this.GetValueWeighted(candles, i));
                 }
-                if (TypeCalculationAverage == MovingAverageTypeCalculation.Radchenko)
+                if (this.TypeCalculationAverage == MovingAverageTypeCalculation.VolumeWeighted)
                 {
-                    Values.Add(GetValueRadchenko(Values, candles, i));
-                }
-                if (TypeCalculationAverage == MovingAverageTypeCalculation.VolumeWeighted)
-                {
-                    Values.Add(GetValueVolumeWeighted(candles, i));
+                    this.Values.Add(this.GetValueVolumeWeighted(candles, i));
                 }
             }
+
+            this.ValuesUp = this.Values.Select(v => decimal.Add(v, decimal.Multiply(this.Width, 0.5m))).ToList();
+            this.ValuesDown = this.Values.Select(v => decimal.Subtract(v, decimal.Multiply(this.Width, 0.5m))).ToList();
         }
 
         /// <summary>
@@ -368,26 +351,25 @@ namespace OsEngine.Charts.CandleChart.Indicators
             {
                 return;
             }
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.Simple)
+            if (this.TypeCalculationAverage == MovingAverageTypeCalculation.Simple)
             {
-                Values[Values.Count - 1] = GetValueSimple(candles, candles.Count - 1);
+                this.Values[this.Values.Count - 1] = this.GetValueSimple(candles, candles.Count - 1);
             }
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.Exponential)
+            if (this.TypeCalculationAverage == MovingAverageTypeCalculation.Exponential)
             {
-                Values[Values.Count - 1] = GetValueExponential(candles, candles.Count - 1);
+                this.Values[this.Values.Count - 1] = this.GetValueExponential(candles, candles.Count - 1);
             }
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.Weighted)
+            if (this.TypeCalculationAverage == MovingAverageTypeCalculation.Weighted)
             {
-                Values[Values.Count - 1] = GetValueWeighted(candles, candles.Count - 1);
+                this.Values[Values.Count - 1] = this.GetValueWeighted(candles, candles.Count - 1);
             }
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.Radchenko)
+            if (this.TypeCalculationAverage == MovingAverageTypeCalculation.VolumeWeighted)
             {
-                Values[Values.Count - 1] = GetValueRadchenko(Values, candles, candles.Count - 2);
+                this.Values[Values.Count - 1] = this.GetValueVolumeWeighted(candles, candles.Count - 1);
             }
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.VolumeWeighted)
-            {
-                Values[Values.Count - 1] = GetValueVolumeWeighted(candles, candles.Count - 1);
-            }
+
+            this.ValuesUp = this.Values.Select(v => decimal.Add(v, decimal.Multiply(this.Width, 0.5m))).ToList();
+            this.ValuesDown = this.Values.Select(v => decimal.Subtract(v, decimal.Multiply(this.Width, 0.5m))).ToList();
         }
 
         /// <summary>
@@ -399,14 +381,12 @@ namespace OsEngine.Charts.CandleChart.Indicators
             {
                 return;
             }
-            _myValues = values;
-            if (Values != null &&
-                Values.Count + 1 == values.Count)
+            this.myValues = values;
+            if (this.Values?.Count + 1 == values.Count)
             {
                 ProcessOne(values);
             }
-            else if (Values != null &&
-                     Values.Count == values.Count)
+            else if (this.Values?.Count == values.Count)
             {
                 ProcessLast(values);
             }
@@ -425,32 +405,31 @@ namespace OsEngine.Charts.CandleChart.Indicators
             {
                 return;
             }
-            if (Values == null)
+            if (this.Values == null)
             {
-                Values = new List<decimal>();
+                this.Values = new List<decimal>();
             }
 
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.VolumeWeighted)
+            if (this.TypeCalculationAverage == MovingAverageTypeCalculation.VolumeWeighted)
             { // по объёму взвесить массив данных не выйдет. Ставим другой признак
-                TypeCalculationAverage = MovingAverageTypeCalculation.Simple;
+                this.TypeCalculationAverage = MovingAverageTypeCalculation.Simple;
             }
 
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.Simple)
+            if (this.TypeCalculationAverage == MovingAverageTypeCalculation.Simple)
             {
-                Values.Add(GetValueSimple(values, values.Count - 1));
+                this.Values.Add(this.GetValueSimple(values, values.Count - 1));
             }
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.Exponential)
+            if (this.TypeCalculationAverage == MovingAverageTypeCalculation.Exponential)
             {
-                Values.Add(GetValueExponential(values, values.Count - 1));
+                this.Values.Add(this.GetValueExponential(values, values.Count - 1));
             }
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.Weighted)
+            if (this.TypeCalculationAverage == MovingAverageTypeCalculation.Weighted)
             {
-                Values.Add(GetValueWeighted(values, values.Count - 1));
+                this.Values.Add(this.GetValueWeighted(values, values.Count - 1));
             }
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.Radchenko)
-            {
-                Values.Add(GetValueRadchenko(Values, values, values.Count - 1));
-            }
+
+            this.ValuesUp = this.Values.Select(v => decimal.Add(v, decimal.Multiply(this.Width, 0.5m))).ToList();
+            this.ValuesDown = this.Values.Select(v => decimal.Subtract(v, decimal.Multiply(this.Width, 0.5m))).ToList();
         }
 
         /// <summary>
@@ -462,28 +441,27 @@ namespace OsEngine.Charts.CandleChart.Indicators
             {
                 return;
             }
-            Values = new List<decimal>();
+            this.Values = new List<decimal>();
 
             for (int i = 0; i < values.Count; i++)
             {
-                if (TypeCalculationAverage == MovingAverageTypeCalculation.Simple)
+                if (this.TypeCalculationAverage == MovingAverageTypeCalculation.Simple)
                 {
-                    Values.Add(GetValueSimple(values, i));
+                    this.Values.Add(this.GetValueSimple(values, i));
                 }
-                if (TypeCalculationAverage == MovingAverageTypeCalculation.Exponential)
+                if (this.TypeCalculationAverage == MovingAverageTypeCalculation.Exponential)
                 {
-                    Values.Add(GetValueExponential(values, i));
+                    this.Values.Add(this.GetValueExponential(values, i));
                 }
-                if (TypeCalculationAverage == MovingAverageTypeCalculation.Weighted ||
-                    TypeCalculationAverage == MovingAverageTypeCalculation.VolumeWeighted)
+                if (this.TypeCalculationAverage == MovingAverageTypeCalculation.Weighted ||
+                    this.TypeCalculationAverage == MovingAverageTypeCalculation.VolumeWeighted)
                 {
-                    Values.Add(GetValueWeighted(values, i));
-                }
-                if (TypeCalculationAverage == MovingAverageTypeCalculation.Radchenko)
-                {
-                    Values.Add(GetValueRadchenko(Values, values, i));
+                    this.Values.Add(this.GetValueWeighted(values, i));
                 }
             }
+
+            this.ValuesUp = this.Values.Select(v => decimal.Add(v, decimal.Multiply(this.Width, 0.5m))).ToList();
+            this.ValuesDown = this.Values.Select(v => decimal.Subtract(v, decimal.Multiply(this.Width, 0.5m))).ToList();
         }
 
         /// <summary>
@@ -495,22 +473,21 @@ namespace OsEngine.Charts.CandleChart.Indicators
             {
                 return;
             }
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.Simple)
+            if (this.TypeCalculationAverage == MovingAverageTypeCalculation.Simple)
             {
-                Values[Values.Count - 1] = GetValueSimple(values, values.Count - 1);
+                this.Values[this.Values.Count - 1] = this.GetValueSimple(values, values.Count - 1);
             }
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.Exponential)
+            if (this.TypeCalculationAverage == MovingAverageTypeCalculation.Exponential)
             {
-                Values[Values.Count - 1] = GetValueExponential(values, values.Count - 1);
+                this.Values[this.Values.Count - 1] = this.GetValueExponential(values, values.Count - 1);
             }
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.Weighted)
+            if (this.TypeCalculationAverage == MovingAverageTypeCalculation.Weighted)
             {
-                Values[Values.Count - 1] = GetValueWeighted(values, values.Count - 1);
+                this.Values[this.Values.Count - 1] = this.GetValueWeighted(values, values.Count - 1);
             }
-            if (TypeCalculationAverage == MovingAverageTypeCalculation.Radchenko)
-            {
-                Values[Values.Count - 1] = GetValueRadchenko(Values, values, values.Count - 2);
-            }
+
+            this.ValuesUp = this.Values.Select(v => decimal.Add(v, decimal.Multiply(this.Width, 0.5m))).ToList();
+            this.ValuesDown = this.Values.Select(v => decimal.Subtract(v, decimal.Multiply(this.Width, 0.5m))).ToList();
         }
 
         /// <summary>
@@ -598,77 +575,6 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return Math.Round(average, 8);
 
-        }
-
-        /// <summary>
-        /// радченко
-        /// </summary>
-        private decimal GetValueRadchenko(List<decimal> lastValues, List<decimal> values, int index)
-        {
-            if (index - Lenght <= 0)
-            {
-                return 0;
-            }
-
-            decimal average = 0;
-
-            for (int i = index; i > index - Lenght; i--)
-            {
-                average += values[i];
-            }
-
-            average = average / Lenght;
-
-            int radchenkoFaze = 0; // 0 - ничего -1 - только вниз +1 только вверх
-
-            if (values[index] > average)
-            {
-                radchenkoFaze = 1;
-            }
-            else if (values[index] < average)
-            {
-                radchenkoFaze = -1;
-            }
-
-            if (radchenkoFaze == 0)
-            {
-                return average;
-            }
-
-            if (values.Count == 0 || values[values.Count - 1] == 0)
-            {
-                return average;
-            }
-
-            if (radchenkoFaze == -1)
-            {
-                decimal lastPoint = lastValues[index - 1];
-
-                if (average < lastPoint)
-                {
-                    return average;
-                }
-                else
-                {
-                    return lastPoint;
-                }
-            }
-
-            if (radchenkoFaze == 1)
-            {
-                decimal lastPoint = lastValues[index - 1];
-
-                if (average > lastPoint)
-                {
-                    return average;
-                }
-                else
-                {
-                    return lastPoint;
-                }
-            }
-
-            return Math.Round(average, 8);
         }
 
         private decimal GetValueSimple(List<Candle> candles, int index)
@@ -785,77 +691,6 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             return Math.Round(average, 8);
 
-        }
-
-        /// <summary>
-        /// радченко
-        /// </summary>
-        private decimal GetValueRadchenko(List<decimal> lastValues, List<Candle> candles, int index)
-        {
-            if (index - Lenght <= 0)
-            {
-                return 0;
-            }
-
-            decimal average = 0;
-
-            for (int i = index; i > index - Lenght; i--)
-            {
-                average += GetPoint(candles, i);
-            }
-
-            average = average / Lenght;
-
-            int radchenkoFaze = 0; // 0 - ничего -1 - только вниз +1 только вверх
-
-            if (candles[index].Close > average)
-            {
-                radchenkoFaze = 1;
-            }
-            else if (candles[index].Close < average)
-            {
-                radchenkoFaze = -1;
-            }
-
-            if (radchenkoFaze == 0)
-            {
-                return average;
-            }
-
-            if (lastValues == null || lastValues.Count == 0 || lastValues[lastValues.Count - 1] == 0)
-            {
-                return average;
-            }
-
-            if (radchenkoFaze == -1)
-            {
-                decimal lastPoint = lastValues[lastValues.Count - 1];
-
-                if (average < lastPoint)
-                {
-                    return average;
-                }
-                else
-                {
-                    return lastPoint;
-                }
-            }
-
-            if (radchenkoFaze == 1)
-            {
-                decimal lastPoint = lastValues[lastValues.Count - 1];
-
-                if (average > lastPoint)
-                {
-                    return average;
-                }
-                else
-                {
-                    return lastPoint;
-                }
-            }
-
-            return Math.Round(average, 8);
         }
 
         /// <summary>
