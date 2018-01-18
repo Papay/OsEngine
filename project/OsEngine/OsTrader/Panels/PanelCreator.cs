@@ -20,7 +20,7 @@ using MessageBox = System.Windows.MessageBox;
 namespace OsEngine.OsTrader.Panels
 {
 
-    public class PanelCreator
+    public partial class PanelCreator
     {
         public static List<string> GetNamesStrategy()
         {
@@ -66,7 +66,7 @@ namespace OsEngine.OsTrader.Panels
             result.Add("Robot");
             result.Add("FirstBot");
 
-            
+            result.Add(TunnelRobot.RobotName);
                 
             return result;
         }
@@ -220,7 +220,10 @@ namespace OsEngine.OsTrader.Panels
                 bot = new PairTraderSpreadSma(name);
             }
             
-
+            if (nameClass == TunnelRobot.RobotName)
+            {
+                bot = new TunnelRobot(name);
+            }
             return bot;
         }
     }
