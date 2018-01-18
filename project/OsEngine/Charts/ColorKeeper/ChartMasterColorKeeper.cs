@@ -28,8 +28,8 @@ namespace OsEngine.Charts.ColorKeeper
         public ChartMasterColorKeeper(string name) 
         {
             _name = name;
-            _pointType = PointType.Circle;
-            _pointSize = 6;
+            _pointType = PointType.Romb;
+            _pointSize = 10;
             Load();
         }
 
