@@ -1,0 +1,28 @@
+On
+False
+False
+False
+False
+False
+False
+False
+True
+False
+True
+False
+True
+True
+True
+False
+True
+False
+Finam
+15.12.2017 0:00:00
+15.03.2018 0:00:00
+Hour1
+Eu
+Eu*ED*GAZP*Si*
+Tick
+5
+True
+True
