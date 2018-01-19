@@ -27,7 +27,7 @@ bld/
 [Ee]ngine/
 [Aa]stsBridge/
 Plaza/Log/
-Data/
+[Dd]ata/
 lua/logs/
 
 # Visual Studio 2015 cache/options directory
