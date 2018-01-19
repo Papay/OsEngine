@@ -36,28 +36,30 @@ namespace OsEngine.OsTrader.Panels
 
             private BotTabSimple bot;
             private Tunnel tunnel;
-            private int Volume;
+            private decimal Volume;
             private BotTradeRegime regime;
 
             public StrategyParameterDecimal Profit;
+            public StrategyParameterDecimal TunnelLength;
             private StrategyParameterDecimal Slippage;
 
             public TunnelRobot(string name)
                 : base(name)
             {
+                this.Profit = new StrategyParameterDecimal("Profit", 0.010m, 0.002m, 0.010m, 0.001m);
+                this.Slippage = new StrategyParameterDecimal("Slippage", 0.0001m, 0.0001m, 0.0005m, 0.0001m);
+                this.TunnelLength = new StrategyParameterDecimal("TunnelLength", 90, 20, 200, 10);
+
                 TabCreate(BotTabType.Simple);
                 this.bot = this.TabsSimple[0];
 
                 Tunnel indicator = new Tunnel(name + Tunnel.IndicatorName, false)
                 {
-                    Lenght = 100,
-                    Width = 500
+                    Lenght = Convert.ToInt32(this.TunnelLength.ValueDecimal),
+                    Width = 70
                 };
                 this.tunnel = (Tunnel)this.bot.CreateCandleIndicator(indicator, "Prime");
                 this.tunnel.Save();
-
-                this.Profit = new StrategyParameterDecimal("Profit", 0.010m, 0.002m, 0.010m, 0.001m);
-                this.Slippage = new StrategyParameterDecimal("Slippage", 0.0001m, 0.0001m, 0.0005m, 0.0001m);
 
                 this.Volume = 2;
                 this.regime = BotTradeRegime.Off;
@@ -169,8 +171,8 @@ namespace OsEngine.OsTrader.Panels
             {
                 Candle lastCandle = candles.Last();
                 decimal profit = decimal.Multiply(lastCandle.Close, this.Profit.ValueDecimal);
-                decimal tunnelUp = tunnel.ValuesUp.Last();
-                decimal tunnelDown = tunnel.ValuesDown.Last();
+                decimal tunnelUp = this.tunnel.ValuesUp.Last();
+                decimal tunnelDown = this.tunnel.ValuesDown.Last();
 
                 switch (openPosition.Direction)
                 {
@@ -181,7 +183,8 @@ namespace OsEngine.OsTrader.Panels
                         }
                         else if (lastCandle.High >= tunnelUp + profit && openPosition.OpenVolume > this.Volume / 2)
                         {
-                            this.bot.CloseAtLimit(openPosition, tunnelUp + profit, this.Volume / 2, "takeprofit");
+                            //this.bot.CloseAtLimit(openPosition, tunnelUp + profit, this.Volume / 2, "takeprofit");
+                            this.bot.CloseAtTrailingStop(openPosition, decimal.Round(tunnelUp + profit), decimal.Round(tunnelUp + profit + openPosition.PriceStep));
                         }
                         //else if (lastCandle.High >= tunnelUp + profit * 2)
                         //{
@@ -195,7 +198,8 @@ namespace OsEngine.OsTrader.Panels
                         }
                         else if (lastCandle.Low <= tunnelDown - profit && openPosition.OpenVolume > this.Volume / 2)
                         {
-                            this.bot.CloseAtLimit(openPosition, tunnelDown - profit, this.Volume / 2, "takeprofit");
+                            //this.bot.CloseAtLimit(openPosition, tunnelDown - profit, this.Volume / 2, "takeprofit");
+                            this.bot.CloseAtTrailingStop(openPosition, decimal.Round(tunnelUp - profit), decimal.Round(tunnelUp - profit - openPosition.PriceStep));
                         }
                         //else if (lastCandle.Low <= tunnelDown - profit * 2)
                         //{
