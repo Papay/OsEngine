@@ -29,7 +29,7 @@ namespace OsEngine.Charts.ColorKeeper
         {
             _name = name;
             _pointType = PointType.Romb;
-            _pointSize = 10;
+            _pointSize = 14;
             Load();
         }
 

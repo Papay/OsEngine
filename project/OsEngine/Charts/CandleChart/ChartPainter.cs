@@ -1565,11 +1565,11 @@ namespace OsEngine.Charts.CandleChart
 
                                 if (openOrder.Side == Side.Buy)
                                 {
-                                    buySellSeries.Points[buySellSeries.Points.Count - 1].Color = Color.ForestGreen;
+                                    buySellSeries.Points[buySellSeries.Points.Count - 1].Color = Color.LimeGreen; // Color.ForestGreen;
                                 }
                                 else
                                 {
-                                    buySellSeries.Points[buySellSeries.Points.Count - 1].Color = Color.Red;
+                                    buySellSeries.Points[buySellSeries.Points.Count - 1].Color = Color.OrangeRed; // Color.Red;
 
                                 }
 
