@@ -694,7 +694,7 @@ namespace OsEngine.OsTrader.Panels
             }
 
             if (ServerMaster.StartProgram == ServerStartProgramm.IsOsTrader
-                && DateTime.Now.Hour < 10)
+                && DateTime.Now.Hour < 9)
             {
                 return;
             }

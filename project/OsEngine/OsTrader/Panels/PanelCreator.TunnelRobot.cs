@@ -21,6 +21,7 @@ using OsEngine.Market;
 using OsEngine.Market.Servers;
 using OsEngine.Market.Servers.Optimizer;
 using OsEngine.Market.Servers.Tester;
+using OsEngine.OsTrader.Panels.PanelsGui;
 using OsEngine.OsTrader.Panels.Tab;
 
 namespace OsEngine.OsTrader.Panels
@@ -35,37 +36,42 @@ namespace OsEngine.OsTrader.Panels
             public static string RobotName = "Tunnel Robot";
 
             private BotTabSimple bot;
+
             private Tunnel tunnel;
-            private decimal Volume;
+
+            private int Volume;
             private BotTradeRegime regime;
 
             public StrategyParameterDecimal Profit;
-            public StrategyParameterDecimal TunnelLength;
-            private StrategyParameterDecimal Slippage;
+            public StrategyParameterInt TunnelLength;
+            public StrategyParameterInt TunnelWidth;
+            private StrategyParameterInt Slippage;
 
             public TunnelRobot(string name)
                 : base(name)
             {
-                this.Profit = new StrategyParameterDecimal("Profit", 0.010m, 0.002m, 0.010m, 0.001m);
-                this.Slippage = new StrategyParameterDecimal("Slippage", 0.0001m, 0.0001m, 0.0005m, 0.0001m);
-                this.TunnelLength = new StrategyParameterDecimal("TunnelLength", 90, 20, 200, 10);
+                this.Profit = new StrategyParameterDecimal("Profit", 0.0020m, 0.002m, 0.010m, 0.001m);
+                this.Slippage = new StrategyParameterInt("Slippage", 1, 0, 10, 1);
+                this.TunnelLength = new StrategyParameterInt("TunnelLength", 80, 20, 200, 5);
+                this.TunnelWidth = new StrategyParameterInt("TunnelWidth", 70, 10, 100, 10);
 
                 TabCreate(BotTabType.Simple);
                 this.bot = this.TabsSimple[0];
 
                 Tunnel indicator = new Tunnel(name + Tunnel.IndicatorName, false)
                 {
-                    Lenght = Convert.ToInt32(this.TunnelLength.ValueDecimal),
-                    Width = 70
+                    Lenght = this.TunnelLength.ValueInt,
+                    Width = this.TunnelWidth.ValueInt
                 };
                 this.tunnel = (Tunnel)this.bot.CreateCandleIndicator(indicator, "Prime");
                 this.tunnel.Save();
 
-                this.Volume = 2;
+                this.Volume = 1;
+
                 this.regime = BotTradeRegime.Off;
 
                 this.bot.CandleFinishedEvent += this.OnCandleFinishedEvent;
-                this.bot.CandleUpdateEvent += this.OnCandleUpdateEvent;
+
                 this.DeleteEvent += this.OnDeleteEvent;
 
                 this.Load();
@@ -104,12 +110,14 @@ namespace OsEngine.OsTrader.Panels
                 }
             }
 
-            private void OnCandleUpdateEvent(List<Candle> candles)
-            {
-            }
-
             private void OnCandleFinishedEvent(List<Candle> candles)
             {
+                if (ServerMaster.StartProgram == ServerStartProgramm.IsOsTrader 
+                    && (DateTime.Now.Hour < 9 || DateTime.Now.Hour > 23))
+                {
+                    return;
+                }
+
                 if (candles.Count <= this.tunnel.Lenght + 1)
                     return;
 
@@ -118,14 +126,16 @@ namespace OsEngine.OsTrader.Panels
 
                 List<Position> openPositions = this.bot.PositionsOpenAll;
 
-                foreach (Position openPosition in openPositions)
-                {
-                    this.LogicClosePosition(candles, openPosition);
-                }
-
                 if (openPositions?.Count == 0)
                 {
                     this.LogicOpenPosition(candles, openPositions);
+                }
+                else
+                {
+                    for (int i = 0; i < openPositions.Count; i++)
+                    {
+                        this.LogicClosePosition(candles, openPositions[i]);
+                    }
                 }
             }
 
@@ -136,7 +146,8 @@ namespace OsEngine.OsTrader.Panels
 
             public override void ShowIndividualSettingsDialog()
             {
-                // TODO
+                TunnelRobotUi dialog = new TunnelRobotUi(this);
+                dialog.ShowDialog();
             }
 
             /// <summary>
@@ -149,16 +160,15 @@ namespace OsEngine.OsTrader.Panels
                 Candle lastCandle = candles[candles.Count - 1];
                 decimal tunnelUp = this.tunnel.ValuesUp[this.tunnel.ValuesUp.Count - 1];
                 decimal tunnelDown = this.tunnel.ValuesDown[this.tunnel.ValuesDown.Count - 1];
+                decimal slippage = this.Slippage.ValueInt * this.bot.Securiti.PriceStep;
 
-                // лонг
                 if (lastCandle.Close < tunnelUp)
                 {
-                    this.bot.BuyAtStop(this.Volume, tunnelUp, tunnelUp, StopActivateType.HigherOrEqual);
+                    this.bot.BuyAtStop(this.Volume, tunnelUp + slippage, tunnelUp, StopActivateType.HigherOrEqual);
                 }
-                // шорт
                 if (lastCandle.Close > tunnelDown)
                 {
-                    this.bot.SellAtStop(this.Volume, tunnelDown, tunnelDown, StopActivateType.LowerOrEqyal);
+                    this.bot.SellAtStop(this.Volume, tunnelDown, tunnelDown - slippage, StopActivateType.LowerOrEqyal);
                 }
             }
 
@@ -173,40 +183,29 @@ namespace OsEngine.OsTrader.Panels
                 decimal profit = decimal.Multiply(lastCandle.Close, this.Profit.ValueDecimal);
                 decimal tunnelUp = this.tunnel.ValuesUp.Last();
                 decimal tunnelDown = this.tunnel.ValuesDown.Last();
+                decimal slippage = this.Slippage.ValueInt * this.bot.Securiti.PriceStep;
 
                 switch (openPosition.Direction)
                 {
                     case Side.Buy:
-                        if (lastCandle.Low <= tunnelDown)
+                        if (lastCandle.Close >= tunnelUp + profit)
                         {
-                            this.bot.CloseAtMarket(openPosition, openPosition.OpenVolume, "stoploss");
+                            this.bot.CloseAtLimit(openPosition, tunnelUp + profit - slippage, openPosition.OpenVolume);
                         }
-                        else if (lastCandle.High >= tunnelUp + profit && openPosition.OpenVolume > this.Volume / 2)
+                        if (lastCandle.Close <= tunnelDown)
                         {
-                            //this.bot.CloseAtLimit(openPosition, tunnelUp + profit, this.Volume / 2, "takeprofit");
-                            this.bot.CloseAtTrailingStop(openPosition, decimal.Round(tunnelUp + profit), decimal.Round(tunnelUp + profit + openPosition.PriceStep));
+                            this.bot.CloseAtMarket(openPosition, openPosition.OpenVolume);
                         }
-                        //else if (lastCandle.High >= tunnelUp + profit * 2)
-                        //{
-                        //    this.bot.CloseAtLimit(openPosition, tunnelUp + profit * 2, openPosition.OpenVolume);
-                        //}
                         break;
                     case Side.Sell:
-                        if (lastCandle.High >= tunnelUp)
+                        if (lastCandle.Close <= tunnelDown - profit)
                         {
-                            this.bot.CloseAtMarket(openPosition, openPosition.OpenVolume, "stoploss");
+                            this.bot.CloseAtLimit(openPosition, tunnelDown - profit + slippage, openPosition.OpenVolume);
                         }
-                        else if (lastCandle.Low <= tunnelDown - profit && openPosition.OpenVolume > this.Volume / 2)
+                        if (lastCandle.Close >= tunnelUp)
                         {
-                            //this.bot.CloseAtLimit(openPosition, tunnelDown - profit, this.Volume / 2, "takeprofit");
-                            this.bot.CloseAtTrailingStop(openPosition, decimal.Round(tunnelUp - profit), decimal.Round(tunnelUp - profit - openPosition.PriceStep));
+                            this.bot.CloseAtMarket(openPosition, openPosition.OpenVolume);
                         }
-                        //else if (lastCandle.Low <= tunnelDown - profit * 2)
-                        //{
-                        //    this.bot.CloseAtLimit(openPosition, tunnelDown - profit * 2, this.Volume / 2);
-                        //}
-                        break;
-                    default:
                         break;
                 }
             }
