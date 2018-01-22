@@ -248,7 +248,7 @@ namespace OsEngine.Charts
                         }
                         if (indicator[0] == Tunnel.IndicatorName)
                         {
-                            CreateIndicator(new TradeThread(indicator[1], Convert.ToBoolean(indicator[3])), indicator[2]);
+                            CreateIndicator(new Tunnel(indicator[1], Convert.ToBoolean(indicator[3])), indicator[2]);
                         }
 
                     }
