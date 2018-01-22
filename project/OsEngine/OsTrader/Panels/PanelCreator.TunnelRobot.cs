@@ -58,12 +58,12 @@ namespace OsEngine.OsTrader.Panels
                 TabCreate(BotTabType.Simple);
                 this.bot = this.TabsSimple[0];
 
-                Tunnel indicator = new Tunnel(name + Tunnel.IndicatorName, false)
+                this.tunnel = new Tunnel(name + Tunnel.IndicatorName, false)
                 {
                     Lenght = this.TunnelLength.ValueInt,
                     Width = this.TunnelWidth.ValueInt
                 };
-                this.tunnel = (Tunnel)this.bot.CreateCandleIndicator(indicator, "Prime");
+                this.tunnel = (Tunnel)this.bot.CreateCandleIndicator(this.tunnel, "Prime");
                 this.tunnel.Save();
 
                 this.Volume = 1;
@@ -132,7 +132,7 @@ namespace OsEngine.OsTrader.Panels
                 }
                 else
                 {
-                    for (int i = 0; i < openPositions.Count; i++)
+                    for (int i = 0; i < openPositions?.Count; i++)
                     {
                         this.LogicClosePosition(candles, openPositions[i]);
                     }
@@ -162,14 +162,8 @@ namespace OsEngine.OsTrader.Panels
                 decimal tunnelDown = this.tunnel.ValuesDown[this.tunnel.ValuesDown.Count - 1];
                 decimal slippage = this.Slippage.ValueInt * this.bot.Securiti.PriceStep;
 
-                if (lastCandle.Close < tunnelUp)
-                {
-                    this.bot.BuyAtStop(this.Volume, tunnelUp + slippage, tunnelUp, StopActivateType.HigherOrEqual);
-                }
-                if (lastCandle.Close > tunnelDown)
-                {
-                    this.bot.SellAtStop(this.Volume, tunnelDown, tunnelDown - slippage, StopActivateType.LowerOrEqyal);
-                }
+                this.bot.BuyAtStop(this.Volume, tunnelUp + slippage, tunnelUp, StopActivateType.HigherOrEqual);
+                this.bot.SellAtStop(this.Volume, tunnelDown, tunnelDown - slippage, StopActivateType.LowerOrEqyal);
             }
 
             /// <summary>
@@ -188,7 +182,7 @@ namespace OsEngine.OsTrader.Panels
                 switch (openPosition.Direction)
                 {
                     case Side.Buy:
-                        if (lastCandle.Close >= tunnelUp + profit)
+                        if (lastCandle.High >= tunnelUp + profit)
                         {
                             this.bot.CloseAtLimit(openPosition, tunnelUp + profit - slippage, openPosition.OpenVolume);
                         }
@@ -198,7 +192,7 @@ namespace OsEngine.OsTrader.Panels
                         }
                         break;
                     case Side.Sell:
-                        if (lastCandle.Close <= tunnelDown - profit)
+                        if (lastCandle.Low <= tunnelDown - profit)
                         {
                             this.bot.CloseAtLimit(openPosition, tunnelDown - profit + slippage, openPosition.OpenVolume);
                         }
