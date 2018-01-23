@@ -7,14 +7,14 @@ False
 False
 False
 True
-False
-True
-False
-True
 True
 True
 False
 True
+True
+True
+False
+False
 False
 QuikLua
 15.12.2017 0:00:00

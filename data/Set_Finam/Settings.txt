@@ -1,0 +1,28 @@
+On
+False
+False
+False
+False
+False
+False
+False
+False
+False
+True
+False
+True
+True
+True
+False
+False
+False
+Finam
+01.01.2008 0:00:00
+01.01.2020 0:00:00
+Hour1
+Si
+Eu*ED*SBRF*LKOH*ROSN*
+Tick
+5
+True
+True
