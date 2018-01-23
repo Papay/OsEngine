@@ -56,10 +56,10 @@ namespace OsEngine.OsTrader.Panels
             public TunnelRobot(string name)
                 : base(name)
             {
-                this.Profit = CreateParameter("Profit", 0.0012m, 0.001m, 0.10m, 0.0002m);
+                this.Profit = CreateParameter("Profit", 0.0012m, 0.001m, 0.10m, 0.0001m);
                 this.Slippage = CreateParameter("Slippage", 1, 0, 10, 1);
-                this.TunnelLength = CreateParameter("Tunnel.Length", 90, 20, 200, 5);
-                this.TunnelWidth = CreateParameter("Tunnel.Width", 60, 10, 100, 10);
+                this.TunnelLength = CreateParameter("Tunnel.Length", 190, 20, 300, 5);
+                this.TunnelWidth = CreateParameter("Tunnel.Width", 50, 10, 200, 10);
 
                 TabCreate(BotTabType.Simple);
                 this.bot = this.TabsSimple[0];
@@ -168,8 +168,8 @@ namespace OsEngine.OsTrader.Panels
 
             public override void ShowIndividualSettingsDialog()
             {
-                TunnelRobotUi dialog = new TunnelRobotUi(this);
-                dialog.ShowDialog();
+                //TunnelRobotUi dialog = new TunnelRobotUi(this);
+                //dialog.ShowDialog();
             }
 
             /// <summary>
