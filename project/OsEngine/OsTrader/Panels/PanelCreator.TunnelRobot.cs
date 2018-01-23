@@ -50,10 +50,10 @@ namespace OsEngine.OsTrader.Panels
             public TunnelRobot(string name)
                 : base(name)
             {
-                this.Profit = new StrategyParameterDecimal("Profit", 0.0020m, 0.002m, 0.010m, 0.001m);
-                this.Slippage = new StrategyParameterInt("Slippage", 1, 0, 10, 1);
-                this.TunnelLength = new StrategyParameterInt("TunnelLength", 80, 20, 200, 5);
-                this.TunnelWidth = new StrategyParameterInt("TunnelWidth", 70, 10, 100, 10);
+                this.Profit = CreateParameter("Profit", 0.0020m, 0.002m, 0.010m, 0.001m);
+                this.Slippage = CreateParameter("Slippage", 1, 0, 10, 1);
+                this.TunnelLength = CreateParameter("Tunnel.Length", 80, 20, 200, 5);
+                this.TunnelWidth = CreateParameter("Tunnel.Width", 80, 10, 100, 10);
 
                 TabCreate(BotTabType.Simple);
                 this.bot = this.TabsSimple[0];
@@ -73,8 +73,18 @@ namespace OsEngine.OsTrader.Panels
                 this.bot.CandleFinishedEvent += this.OnCandleFinishedEvent;
 
                 this.DeleteEvent += this.OnDeleteEvent;
+                this.ParametrsChangeByUser += this.OnParametrsChangeByUser;
+                //this.Load();
+            }
 
-                this.Load();
+            private void OnParametrsChangeByUser()
+            {
+                if (this.tunnel.Lenght != this.TunnelLength.ValueInt || this.tunnel.Width != this.TunnelWidth.ValueInt)
+                {
+                    this.tunnel.Lenght = this.TunnelLength.ValueInt;
+                    this.tunnel.Width = this.TunnelWidth.ValueInt;
+                    this.tunnel.Reload();
+                }
             }
 
             /// <summary>
