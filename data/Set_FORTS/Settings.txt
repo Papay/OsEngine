@@ -1,0 +1,28 @@
+On
+False
+False
+False
+False
+False
+False
+False
+True
+True
+True
+False
+True
+True
+True
+False
+False
+False
+QuikLua
+15.12.2017 0:00:00
+15.12.2018 0:00:00
+Min5
+SiH8
+SiH8*LKH8*FSH8*EuH8*GZH8*MNH8*RIH8*SRH8*VBH8*	
+Tick
+5
+True
+True
