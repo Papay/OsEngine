@@ -69,7 +69,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
             try
             {
                 if (Convert.ToInt32(TextBoxLenght.Text) <= 0 ||
-                    Convert.ToInt32(TextBoxWidth.Text) <= 0 /*||
+                    Convert.ToDecimal(TextBoxWidth.Text) <= 0 /*||
                     Convert.ToInt32(TextBoxProfit.Text) <= 0*/)
                 {
                     throw new Exception("error");
@@ -84,7 +84,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             tunnel.ColorBase = HostColor.Child.BackColor;
             tunnel.Lenght = Convert.ToInt32(TextBoxLenght.Text);
-            tunnel.Width = Convert.ToInt32(TextBoxWidth.Text);
+            tunnel.Width = Convert.ToDecimal(TextBoxWidth.Text);
             tunnel.PaintOn = CheckBoxPaintOnOff.IsChecked.Value;
 
             ComboBoxMovingType.Items.Add(MovingAverageTypeCalculation.Exponential);

@@ -61,9 +61,11 @@ namespace OsEngine.Charts.CandleChart.Indicators
         {
             get
             {
-                List<Color> colors = new List<Color>();
-                colors.Add(ColorBase);
-                colors.Add(ColorBase);
+                List<Color> colors = new List<Color>
+                {
+                    ColorBase,
+                    ColorBase
+                };
                 return colors;
             }
         }
@@ -103,7 +105,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
         /// <summary>
         /// ширина туннеля индикатора
         /// </summary>
-        public int Width { get; set; }
+        public decimal Width { get; set; }
 
         /// <summary>
         /// тип скользящей средней
@@ -166,14 +168,14 @@ namespace OsEngine.Charts.CandleChart.Indicators
             }
             try
             {
-                using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
+                using (var reader = new StreamReader(@"Engine\" + Name + @".txt"))
                 {
-                    ColorBase = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-                    Lenght = Convert.ToInt32(reader.ReadLine());
-                    Width = Convert.ToInt32(reader.ReadLine());
-                    PaintOn = Convert.ToBoolean(reader.ReadLine());
-                    Enum.TryParse(reader.ReadLine(), true, out TypeCalculationAverage);
-                    Enum.TryParse(reader.ReadLine(), true, out TypePointsToSearch);
+                    this.ColorBase = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
+                    this.Lenght = Convert.ToInt32(reader.ReadLine());
+                    this.Width = Convert.ToDecimal(reader.ReadLine());
+                    this.PaintOn = Convert.ToBoolean(reader.ReadLine());
+                    Enum.TryParse(reader.ReadLine(), true, out this.TypeCalculationAverage);
+                    Enum.TryParse(reader.ReadLine(), true, out this.TypePointsToSearch);
 
                     reader.ReadLine();
 
