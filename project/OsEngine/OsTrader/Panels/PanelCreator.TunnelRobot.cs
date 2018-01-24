@@ -59,7 +59,7 @@ namespace OsEngine.OsTrader.Panels
                 this.Profit = CreateParameter("Profit", 0.0012m, 0.001m, 0.10m, 0.0001m);
                 this.Slippage = CreateParameter("Slippage", 1, 0, 10, 1);
                 this.TunnelLength = CreateParameter("Tunnel.Length", 190, 20, 300, 5);
-                this.TunnelWidth = CreateParameter("Tunnel.Width", 50, 10, 200, 10);
+                this.TunnelWidth = CreateParameter("Tunnel.Width", 60, 10, 200, 10);
 
                 TabCreate(BotTabType.Simple);
                 this.bot = this.TabsSimple[0];
@@ -95,6 +95,7 @@ namespace OsEngine.OsTrader.Panels
                 {
                     this.tunnel.Lenght = this.TunnelLength.ValueInt;
                     this.tunnel.Width = this.TunnelWidth.ValueInt;
+                    this.tunnel.Save();
                     this.tunnel.Reload();
                 }
             }
@@ -276,7 +277,7 @@ namespace OsEngine.OsTrader.Panels
                             {
                                 if (lastCandle.Low <= tunnelDown - profit * 4)
                                 {
-                                    this.bot.CloseAtLimit(openPosition, tunnelDown - profit * 4 + slippage, this.Volume4);
+                                    this.bot.CloseAtLimit(openPosition, tunnelDown - profit * 4.4m + slippage, this.Volume4);
                                     OpenVolume[3] = false;
                                 }
                             }
@@ -284,7 +285,7 @@ namespace OsEngine.OsTrader.Panels
                             {
                                 if (lastCandle.Low <= tunnelDown - profit * 3)
                                 {
-                                    this.bot.CloseAtLimit(openPosition, tunnelDown - profit * 3 + slippage, this.Volume3);
+                                    this.bot.CloseAtLimit(openPosition, tunnelDown - profit * 3.3m + slippage, this.Volume3);
                                     OpenVolume[2] = false;
                                 }
                             }
@@ -292,15 +293,15 @@ namespace OsEngine.OsTrader.Panels
                             {
                                 if (lastCandle.Low <= tunnelDown - profit * 2)
                                 {
-                                    this.bot.CloseAtLimit(openPosition, tunnelDown - profit * 2 + slippage, this.Volume2);
+                                    this.bot.CloseAtLimit(openPosition, tunnelDown - profit * 2.2m + slippage, this.Volume2);
                                     OpenVolume[1] = false;
                                 }
                             }
                             if (OpenVolume[0])
                             {
-                                if (lastCandle.Low <= tunnelDown - profit * 1)
+                                if (lastCandle.Low <= tunnelDown - profit * 1.0m)
                                 {
-                                    this.bot.CloseAtLimit(openPosition, tunnelDown - profit * 1 + slippage, this.Volume1);
+                                    this.bot.CloseAtLimit(openPosition, tunnelDown - profit * 1.0m + slippage, this.Volume1);
                                     OpenVolume[0] = false;
                                 }
                             }
