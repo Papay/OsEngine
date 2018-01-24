@@ -92,7 +92,7 @@ namespace OsEngine.OsTrader.Panels
                 this.OpenVolume = new bool[] {false, false, false, false };
                 
                 
-                this.regime = BotTradeRegime.Off;
+                this.regime = BotTradeRegime.On;
                 this.regime2 = BotTradeRegime.On;
 
                 this.bot.CandleFinishedEvent += this.OnCandleFinishedEvent;
@@ -382,17 +382,28 @@ namespace OsEngine.OsTrader.Panels
 
                 decimal profit = decimal.Multiply(lastCandle.Close, this.Profit.ValueDecimal);
                 decimal profit1 = profit * 0.9m;
+                decimal profit2 = profit * 2.1m;
 
                 if (lastCandle.High > tunnelUp + profit1)
                 {
                     int volume = this.Volume1 + this.Volume2 + this.Volume3 + this.Volume4;
                     this.bot2.SellAtStop(volume, tunnelUp + profit1 - slippage, tunnelUp + profit1, StopActivateType.LowerOrEqyal);
                 }
+                if (lastCandle.High > tunnelUp + profit2)
+                {
+                    int volume = this.Volume1 + this.Volume2 + this.Volume3 + this.Volume4;
+                    this.bot2.SellAtStop(volume, tunnelUp + profit2 - slippage, tunnelUp + profit2, StopActivateType.LowerOrEqyal);
+                }
 
                 if (lastCandle.Low < tunnelDown - profit1)
                 {
                     int volume = this.Volume1 + this.Volume2 + this.Volume3 + this.Volume4;
                     this.bot2.BuyAtStop(volume, tunnelDown - profit1 + slippage, tunnelDown - profit1, StopActivateType.HigherOrEqual);
+                }
+                if (lastCandle.Low < tunnelDown - profit2)
+                {
+                    int volume = this.Volume1 + this.Volume2 + this.Volume3 + this.Volume4;
+                    this.bot2.BuyAtStop(volume, tunnelDown - profit2 + slippage, tunnelDown - profit2, StopActivateType.HigherOrEqual);
                 }
             }
 
@@ -409,17 +420,16 @@ namespace OsEngine.OsTrader.Panels
                 decimal slippage = this.Slippage.ValueInt * this.bot2.Securiti.PriceStep;
 
                 decimal profit = decimal.Multiply(lastCandle.Close, this.Profit.ValueDecimal);
-                decimal profit1 = profit * 0.9m;
 
                 switch (openPosition.Direction)
                 {
                     case Side.Buy:
                         this.bot2.CloseAtProfit(openPosition, tunnelUp, tunnelUp + slippage);
-                        this.bot2.CloseAtStop(openPosition, openPosition.EntryPrice - profit1 * 0.5m, openPosition.EntryPrice + profit1 * 0.5m - slippage);
+                        this.bot2.CloseAtStop(openPosition, openPosition.EntryPrice - profit * 0.5m, openPosition.EntryPrice + profit * 0.5m - slippage);
                         break;
                     case Side.Sell:
                         this.bot2.CloseAtProfit(openPosition, tunnelDown, tunnelDown - slippage);
-                        this.bot2.CloseAtStop(openPosition, openPosition.EntryPrice + profit1 * 0.5m, openPosition.EntryPrice + profit1 * 0.5m + slippage);
+                        this.bot2.CloseAtStop(openPosition, openPosition.EntryPrice + profit * 0.5m, openPosition.EntryPrice + profit * 0.5m + slippage);
                         break;
                 }
             }
