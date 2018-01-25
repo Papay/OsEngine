@@ -1,0 +1,28 @@
+On
+False
+False
+False
+False
+False
+False
+False
+True
+False
+False
+False
+False
+False
+False
+False
+False
+False
+Finam
+01.01.2009 0:00:00
+01.01.2019 0:00:00
+Min1
+Si
+Si*
+Tick
+5
+True
+True
