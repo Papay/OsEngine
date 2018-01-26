@@ -46,7 +46,7 @@ namespace OsEngine.OsTrader.Panels
             private readonly int Volume2;
             private readonly int Volume3;
             private readonly int Volume4;
-            private bool[] OpenVolume;
+            private readonly int Volume5;
 
             private BotTradeRegime regime;
             //private BotTradeRegime regime2;
@@ -88,10 +88,8 @@ namespace OsEngine.OsTrader.Panels
                 this.Volume2 = 1;
                 this.Volume3 = 1;
                 this.Volume4 = 1;
+                this.Volume5 = 1;
 
-                this.OpenVolume = new bool[] {false, false, false, false };
-                
-                
                 this.regime = BotTradeRegime.On;
                 //this.regime2 = BotTradeRegime.On;
 
@@ -241,9 +239,10 @@ namespace OsEngine.OsTrader.Panels
                 if (lastCandle.High >= tunnelUp)
                 {
                     this.bot.BuyAtMarket(this.Volume1, "L1");
-                    this.bot.BuyAtMarket(this.Volume1, "L2");
-                    this.bot.BuyAtMarket(this.Volume1, "L3");
-                    this.bot.BuyAtMarket(this.Volume1, "L4");
+                    this.bot.BuyAtMarket(this.Volume2, "L2");
+                    this.bot.BuyAtMarket(this.Volume3, "L3");
+                    this.bot.BuyAtMarket(this.Volume4, "L4");
+                    this.bot.BuyAtMarket(this.Volume5, "L5");
 
                     //this.bot.BuyAtLimit(this.Volume1, tunnelUp + slippage, "L1");
                     //this.bot.BuyAtLimit(this.Volume2, tunnelUp + slippage, "L2");
@@ -254,9 +253,10 @@ namespace OsEngine.OsTrader.Panels
                 if (lastCandle.Low <= tunnelDown)
                 {
                     this.bot.SellAtMarket(this.Volume1, "L1");
-                    this.bot.SellAtMarket(this.Volume1, "L2");
-                    this.bot.SellAtMarket(this.Volume1, "L3");
-                    this.bot.SellAtMarket(this.Volume1, "L4");
+                    this.bot.SellAtMarket(this.Volume2, "L2");
+                    this.bot.SellAtMarket(this.Volume3, "L3");
+                    this.bot.SellAtMarket(this.Volume4, "L4");
+                    this.bot.SellAtMarket(this.Volume5, "L5");
 
                     //this.bot.SellAtLimit(this.Volume1, tunnelDown - slippage, "L1");
                     //this.bot.SellAtLimit(this.Volume2, tunnelDown - slippage, "L2");
@@ -300,6 +300,8 @@ namespace OsEngine.OsTrader.Panels
                             case "L4":
                                 this.bot.CloseAtProfit(openPosition, tunnelUp + profit4, tunnelUp + profit4 - slippage);
                                 break;
+                            case "L5":
+                                break;
                             default:
                                 throw new InvalidOperationException($"Unexpectted long position with signal type open: {openPosition.SignalTypeOpen}");
                         }
@@ -319,6 +321,8 @@ namespace OsEngine.OsTrader.Panels
                                 break;
                             case "L4":
                                 this.bot.CloseAtProfit(openPosition, tunnelDown - profit4, tunnelDown - profit4 + slippage);
+                                break;
+                            case "L5":
                                 break;
                             default:
                                 throw new InvalidOperationException($"Unexpectted short position with signal type open: {openPosition.SignalTypeOpen}");
