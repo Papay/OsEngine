@@ -37,11 +37,9 @@ namespace OsEngine.OsTrader.Panels
             public static string RobotName = "Tunnel Robot";
 
             private readonly BotTabSimple bot;
-            //private readonly BotTabSimple bot2;
-
+        
             private readonly Tunnel tunnel;
-            //private readonly Tunnel tunnel2;
-
+        
             private readonly int Volume1;
             private readonly int Volume2;
             private readonly int Volume3;
@@ -49,8 +47,7 @@ namespace OsEngine.OsTrader.Panels
             private readonly int Volume5;
 
             private BotTradeRegime regime;
-            //private BotTradeRegime regime2;
-
+        
             public StrategyParameterDecimal Profit;
             public StrategyParameterInt TunnelLength;
             public StrategyParameterInt TunnelWidth;
@@ -74,16 +71,6 @@ namespace OsEngine.OsTrader.Panels
                 this.tunnel = (Tunnel)this.bot.CreateCandleIndicator(this.tunnel, "Prime");
                 this.tunnel.Save();
 
-                //TabCreate(BotTabType.Simple);
-                //this.bot2 = this.TabsSimple[1];
-
-                //this.tunnel2 = new Tunnel(name + Tunnel.IndicatorName + "2", false);
-                //this.tunnel2.Lenght = this.TunnelLength.ValueInt;
-                //this.tunnel2.Width = this.TunnelWidth.ValueInt;
-
-                //this.tunnel2 = (Tunnel)this.bot2.CreateCandleIndicator(this.tunnel2, "Prime");
-                //this.tunnel2.Save();
-
                 this.Volume1 = 1;
                 this.Volume2 = 1;
                 this.Volume3 = 1;
@@ -91,14 +78,11 @@ namespace OsEngine.OsTrader.Panels
                 this.Volume5 = 2;
 
                 this.regime = BotTradeRegime.On;
-                //this.regime2 = BotTradeRegime.On;
 
                 this.bot.CandleFinishedEvent += this.OnCandleFinishedEvent;
-                //this.bot2.CandleFinishedEvent += this.OnCandleFinishedEvent2;
 
                 this.DeleteEvent += this.OnDeleteEvent;
                 this.ParametrsChangeByUser += this.OnParametrsChangeByUser;
-                //this.Load();
             }
 
             private void OnParametrsChangeByUser()
@@ -109,11 +93,6 @@ namespace OsEngine.OsTrader.Panels
                     this.tunnel.Width = this.TunnelWidth.ValueInt;
                     this.tunnel.Save();
                     this.tunnel.Reload();
-
-                    //this.tunnel2.Lenght = this.TunnelLength.ValueInt;
-                    //this.tunnel2.Width = this.TunnelWidth.ValueInt;
-                    //this.tunnel2.Save();
-                    //this.tunnel2.Reload();
                 }
             }
 
