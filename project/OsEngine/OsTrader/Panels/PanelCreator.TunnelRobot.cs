@@ -57,8 +57,8 @@ namespace OsEngine.OsTrader.Panels
             {
                 this.Profit = CreateParameter("Profit", 0.12m, 0.01m, 1.0m, 0.01m);
                 this.Slippage = CreateParameter("Slippage", 1, 1, 10, 1);
-                this.TunnelLength = CreateParameter("Tunnel.Length", 190, 20, 200, 5);
-                this.TunnelWidth = CreateParameter("Tunnel.Width", 70, 20, 300, 10);
+                this.TunnelLength = CreateParameter("Tunnel.Length", 140, 20, 200, 5);
+                this.TunnelWidth = CreateParameter("Tunnel.Width", 80, 20, 300, 10);
 
                 TabCreate(BotTabType.Simple);
                 this.bot = this.TabsSimple[0];
@@ -155,6 +155,26 @@ namespace OsEngine.OsTrader.Panels
                     for (int i = 0; i < openPositions?.Count; i++)
                     {
                         this.LogicClosePosition(candles, openPositions[i]);
+                    }
+
+                    if (openPositions.Count(p => p.SignalTypeOpen == "L1") == 0 &&
+                        openPositions.Count(p => p.SignalTypeOpen == "L4") > 0 &&
+                        openPositions.Count(p => p.SignalTypeOpen == "L5") > 0)
+                    {
+                        Candle lastCandle = candles[candles.Count - 1];
+                        decimal tunnelUp = this.tunnel.ValuesUp[this.tunnel.ValuesUp.Count - 1];
+                        decimal tunnelDown = this.tunnel.ValuesDown[this.tunnel.ValuesDown.Count - 1];
+                        decimal slippage = this.Slippage.ValueInt * this.bot.Securiti.PriceStep;
+
+                        //if (openPositions.All(p => p.Direction == Side.Buy))
+                        //{
+                        //    this.bot.BuyAtLimit(this.Volume1, tunnelUp + slippage, "L1");
+                        //}
+
+                        //if (openPositions.All(p => p.Direction == Side.Sell))
+                        //{
+                        //    this.bot.SellAtLimit(this.Volume1, tunnelDown - slippage, "L1");
+                        //}
                     }
                 }
             }
@@ -255,17 +275,23 @@ namespace OsEngine.OsTrader.Panels
                         {
                             case "L1":
                                 if ((lastCandle.Close - openPosition.EntryPrice) > profit2)
-                                    this.bot.CloseAtProfit(openPosition, tunnelUp + profit2, tunnelUp + profit2 - slippage);
+                                    this.bot.CloseAtProfit(openPosition, openPosition.EntryPrice + profit2, openPosition.EntryPrice + profit2 - slippage);
                                 else
                                     this.bot.CloseAtProfit(openPosition, tunnelUp + profit1, tunnelUp + profit1 - slippage);
                                 this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
                                 break;
                             case "L2":
-                                this.bot.CloseAtProfit(openPosition, tunnelUp + profit2, tunnelUp + profit2 - slippage);
+                                if ((lastCandle.Close - openPosition.EntryPrice) > profit3)
+                                    this.bot.CloseAtProfit(openPosition, openPosition.EntryPrice + profit3, openPosition.EntryPrice + profit3 - slippage);
+                                else
+                                    this.bot.CloseAtProfit(openPosition, tunnelUp + profit2, tunnelUp + profit2 - slippage);
                                 this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
                                 break;
                             case "L3":
-                                this.bot.CloseAtProfit(openPosition, tunnelUp + profit3, tunnelUp + profit3 - slippage);
+                                if ((lastCandle.Close - openPosition.EntryPrice) > profit4)
+                                    this.bot.CloseAtProfit(openPosition, openPosition.EntryPrice + profit4, openPosition.EntryPrice + profit4 - slippage);
+                                else
+                                    this.bot.CloseAtProfit(openPosition, tunnelUp + profit3, tunnelUp + profit3 - slippage);
                                 this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
                                 break;
                             case "L4":
@@ -273,18 +299,11 @@ namespace OsEngine.OsTrader.Panels
                                 this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
                                 break;
                             case "L5":
-                                if (this.bot.PositionOpenLong.All(position => position.SignalTypeOpen == "L5"))
-                                {
-                                    decimal lastLongStopPrice = tunnelDown + this.tunnel.Width * 0.5m;
-                                    this.bot.CloseAtStop(openPosition, lastLongStopPrice, lastLongStopPrice - slippage);
-                                }
-                                else
-                                {
-                                    this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
-                                }
+                                this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
                                 break;
                             default:
-                                throw new InvalidOperationException($"Unexpectted long position with signal type open: {openPosition.SignalTypeOpen}");
+                                throw new InvalidOperationException(
+                                    $"Unexpectted long position with signal type open: {openPosition.SignalTypeOpen}");
                         }
                         break;
                     case Side.Sell:
@@ -311,18 +330,11 @@ namespace OsEngine.OsTrader.Panels
                                 this.bot.CloseAtStop(openPosition, shortStopPrice, shortStopPrice + slippage);
                                 break;
                             case "L5":
-                                if (this.bot.PositionOpenShort.All(position => position.SignalTypeOpen == "L5"))
-                                {
-                                    decimal lastShortStopPrice = tunnelUp - tunnel.Width * 0.5m;
-                                    this.bot.CloseAtStop(openPosition, lastShortStopPrice, lastShortStopPrice + slippage);
-                                }
-                                else
-                                {
-                                    this.bot.CloseAtStop(openPosition, tunnelUp, tunnelUp + slippage);
-                                }
+                                this.bot.CloseAtStop(openPosition, shortStopPrice, shortStopPrice + slippage);
                                 break;
                             default:
-                                throw new InvalidOperationException($"Unexpectted short position with signal type open: {openPosition.SignalTypeOpen}");
+                                throw new InvalidOperationException(
+                                    $"Unexpectted short position with signal type open: {openPosition.SignalTypeOpen}");
                         }
                         break;
                 }
