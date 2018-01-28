@@ -288,10 +288,7 @@ namespace OsEngine.OsTrader.Panels
                                 this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
                                 break;
                             case "L3":
-                                if ((lastCandle.Close - openPosition.EntryPrice) > profit4)
-                                    this.bot.CloseAtProfit(openPosition, openPosition.EntryPrice + profit4, openPosition.EntryPrice + profit4 - slippage);
-                                else
-                                    this.bot.CloseAtProfit(openPosition, tunnelUp + profit3, tunnelUp + profit3 - slippage);
+                                this.bot.CloseAtProfit(openPosition, tunnelUp + profit3, tunnelUp + profit3 - slippage);
                                 this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
                                 break;
                             case "L4":
@@ -312,13 +309,16 @@ namespace OsEngine.OsTrader.Panels
                         {
                             case "L1":
                                 if ((openPosition.EntryPrice - lastCandle.Close) > profit2)
-                                    this.bot.CloseAtProfit(openPosition, tunnelDown - profit2, tunnelDown - profit2 + slippage);
+                                    this.bot.CloseAtProfit(openPosition, openPosition.EntryPrice - profit2, openPosition.EntryPrice - profit2 + slippage);
                                 else
                                     this.bot.CloseAtProfit(openPosition, tunnelDown - profit1, tunnelDown - profit1 + slippage);
                                 this.bot.CloseAtStop(openPosition, shortStopPrice, shortStopPrice + slippage);
                                 break;
                             case "L2":
-                                this.bot.CloseAtProfit(openPosition, tunnelDown - profit2, tunnelDown - profit2 + slippage);
+                                if ((openPosition.EntryPrice - lastCandle.Close) > profit3)
+                                    this.bot.CloseAtProfit(openPosition, openPosition.EntryPrice - profit3, openPosition.EntryPrice - profit3 + slippage);
+                                else
+                                    this.bot.CloseAtProfit(openPosition, tunnelDown - profit2, tunnelDown - profit2 + slippage);
                                 this.bot.CloseAtStop(openPosition, shortStopPrice, shortStopPrice + slippage);
                                 break;
                             case "L3":
