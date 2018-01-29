@@ -43,7 +43,6 @@ namespace OsEngine.OsTrader.Panels
             private readonly int Volume2;
             private readonly int Volume3;
             private readonly int Volume4;
-            private readonly int Volume5;
 
             private BotTradeRegime regime;
         
@@ -55,7 +54,7 @@ namespace OsEngine.OsTrader.Panels
             public TunnelRobot(string name)
                 : base(name)
             {
-                this.Profit = CreateParameter("Profit", 0.12m, 0.01m, 1.0m, 0.01m);
+                this.Profit = CreateParameter("Profit", 0.12m, 0.10m, 1.0m, 0.01m);
                 this.Slippage = CreateParameter("Slippage", 1, 1, 10, 1);
                 this.TunnelLength = CreateParameter("Tunnel.Length", 140, 20, 200, 5);
                 this.TunnelWidth = CreateParameter("Tunnel.Width", 80, 20, 300, 10);
@@ -63,9 +62,11 @@ namespace OsEngine.OsTrader.Panels
                 TabCreate(BotTabType.Simple);
                 this.bot = this.TabsSimple[0];
 
-                this.tunnel = new Tunnel(name + Tunnel.IndicatorName, false);
-                this.tunnel.Lenght = this.TunnelLength.ValueInt;
-                this.tunnel.Width = this.TunnelWidth.ValueInt;
+                this.tunnel = new Tunnel(name + Tunnel.IndicatorName, false)
+                {
+                    Lenght = this.TunnelLength.ValueInt,
+                    Width = this.TunnelWidth.ValueInt
+                };
 
                 this.tunnel = (Tunnel)this.bot.CreateCandleIndicator(this.tunnel, "Prime");
                 this.tunnel.Save();
@@ -147,6 +148,9 @@ namespace OsEngine.OsTrader.Panels
 
                 if (openPositions?.Count == 0)
                 {
+                    if (this.regime == BotTradeRegime.OnlyClosePosition)
+                        return;
+
                     this.LogicOpenPosition(candles, openPositions);
                 }
                 else
@@ -185,15 +189,17 @@ namespace OsEngine.OsTrader.Panels
                 decimal profit1 = profit * 1.0m;
                 decimal profit2 = profit * 2.0m;
                 decimal profit3 = profit * 4.0m;
-
+                
                 if (lastCandle.High >= tunnelUp)
                 {
+                    if (this.regime == BotTradeRegime.OnlyShort)
+                        return;
+
                     if (lastCandle.Close < tunnelUp + profit1)
                         this.bot.BuyAtMarket(this.Volume1, "L1");
                     if (lastCandle.Close < tunnelUp + profit2)
-                        this.bot.BuyAtMarket(this.Volume2, "L2");
-                    if (lastCandle.Close < tunnelUp + profit3)
                     {
+                        this.bot.BuyAtMarket(this.Volume2, "L2");
                         this.bot.BuyAtMarket(this.Volume3, "L3");
                         this.bot.BuyAtMarket(this.Volume4, "L4");
                     }
@@ -201,12 +207,14 @@ namespace OsEngine.OsTrader.Panels
                     
                 if (lastCandle.Low <= tunnelDown)
                 {
+                    if (this.regime == BotTradeRegime.OnlyLong)
+                        return;
+
                     if (lastCandle.Close > tunnelDown - profit1)
                         this.bot.SellAtMarket(this.Volume1, "L1");
                     if (lastCandle.Close > tunnelDown - profit2)
-                        this.bot.SellAtMarket(this.Volume2, "L2");
-                    if (lastCandle.Close > tunnelDown - profit3)
                     {
+                        this.bot.SellAtMarket(this.Volume2, "L2");
                         this.bot.SellAtMarket(this.Volume3, "L3");
                         this.bot.SellAtMarket(this.Volume4, "L4");
                     }
@@ -234,7 +242,7 @@ namespace OsEngine.OsTrader.Panels
                 switch (openPosition.Direction)
                 {
                     case Side.Buy:
-                        decimal longStopPrice = tunnelDown + this.tunnel.Width * 0.1m;
+                        decimal longStopPrice = tunnelDown + this.tunnel.Width * 0.5m;
                         switch (openPosition.SignalTypeOpen)
                         {
                             case "L1":
@@ -264,7 +272,7 @@ namespace OsEngine.OsTrader.Panels
                         }
                         break;
                     case Side.Sell:
-                        decimal shortStopPrice = tunnelUp - this.tunnel.Width * 0.1m;
+                        decimal shortStopPrice = tunnelUp - this.tunnel.Width * 0.5m;
                         switch (openPosition.SignalTypeOpen)
                         {
                             case "L1":
