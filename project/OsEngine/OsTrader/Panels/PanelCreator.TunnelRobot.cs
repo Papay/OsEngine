@@ -73,8 +73,7 @@ namespace OsEngine.OsTrader.Panels
                 this.Volume1 = 2;
                 this.Volume2 = 1;
                 this.Volume3 = 1;
-                this.Volume4 = 1;
-                this.Volume5 = 2;
+                this.Volume4 = 2;
 
                 this.regime = BotTradeRegime.On;
 
@@ -156,26 +155,6 @@ namespace OsEngine.OsTrader.Panels
                     {
                         this.LogicClosePosition(candles, openPositions[i]);
                     }
-
-                    if (openPositions.Count(p => p.SignalTypeOpen == "L1") == 0 &&
-                        openPositions.Count(p => p.SignalTypeOpen == "L4") > 0 &&
-                        openPositions.Count(p => p.SignalTypeOpen == "L5") > 0)
-                    {
-                        Candle lastCandle = candles[candles.Count - 1];
-                        decimal tunnelUp = this.tunnel.ValuesUp[this.tunnel.ValuesUp.Count - 1];
-                        decimal tunnelDown = this.tunnel.ValuesDown[this.tunnel.ValuesDown.Count - 1];
-                        decimal slippage = this.Slippage.ValueInt * this.bot.Securiti.PriceStep;
-
-                        //if (openPositions.All(p => p.Direction == Side.Buy))
-                        //{
-                        //    this.bot.BuyAtLimit(this.Volume1, tunnelUp + slippage, "L1");
-                        //}
-
-                        //if (openPositions.All(p => p.Direction == Side.Sell))
-                        //{
-                        //    this.bot.SellAtLimit(this.Volume1, tunnelDown - slippage, "L1");
-                        //}
-                    }
                 }
             }
 
@@ -204,9 +183,8 @@ namespace OsEngine.OsTrader.Panels
 
                 decimal profit = decimal.Multiply(lastCandle.Close, this.Profit.ValueDecimal / 100m);
                 decimal profit1 = profit * 1.0m;
-                decimal profit2 = profit * 3.0m;
-                decimal profit3 = profit * 5.0m;
-                decimal profit4 = profit * 7.0m;
+                decimal profit2 = profit * 2.0m;
+                decimal profit3 = profit * 4.0m;
 
                 if (lastCandle.High >= tunnelUp)
                 {
@@ -215,17 +193,10 @@ namespace OsEngine.OsTrader.Panels
                     if (lastCandle.Close < tunnelUp + profit2)
                         this.bot.BuyAtMarket(this.Volume2, "L2");
                     if (lastCandle.Close < tunnelUp + profit3)
-                        this.bot.BuyAtMarket(this.Volume3, "L3");
-                    if (lastCandle.Close < tunnelUp + profit4)
                     {
+                        this.bot.BuyAtMarket(this.Volume3, "L3");
                         this.bot.BuyAtMarket(this.Volume4, "L4");
-                        this.bot.BuyAtMarket(this.Volume5, "L5");
                     }
-
-                    //this.bot.BuyAtLimit(this.Volume1, tunnelUp + slippage, "L1");
-                    //this.bot.BuyAtLimit(this.Volume2, tunnelUp + slippage, "L2");
-                    //this.bot.BuyAtLimit(this.Volume3, tunnelUp + slippage, "L3");
-                    //this.bot.BuyAtLimit(this.Volume4, tunnelUp + slippage, "L4");
                 }
                     
                 if (lastCandle.Low <= tunnelDown)
@@ -235,17 +206,10 @@ namespace OsEngine.OsTrader.Panels
                     if (lastCandle.Close > tunnelDown - profit2)
                         this.bot.SellAtMarket(this.Volume2, "L2");
                     if (lastCandle.Close > tunnelDown - profit3)
-                        this.bot.SellAtMarket(this.Volume3, "L3");
-                    if (lastCandle.Close > tunnelDown - profit4)
                     {
+                        this.bot.SellAtMarket(this.Volume3, "L3");
                         this.bot.SellAtMarket(this.Volume4, "L4");
-                        this.bot.SellAtMarket(this.Volume5, "L5");
                     }
-
-                    //this.bot.SellAtLimit(this.Volume1, tunnelDown - slippage, "L1");
-                    //this.bot.SellAtLimit(this.Volume2, tunnelDown - slippage, "L2");
-                    //this.bot.SellAtLimit(this.Volume3, tunnelDown - slippage, "L3");
-                    //this.bot.SellAtLimit(this.Volume4, tunnelDown - slippage, "L4");
                 }
             }
 
@@ -263,14 +227,14 @@ namespace OsEngine.OsTrader.Panels
 
                 decimal profit = decimal.Multiply(lastCandle.Close, this.Profit.ValueDecimal / 100m);
                 decimal profit1 = profit * 1.0m;
-                decimal profit2 = profit * 3.0m;
-                decimal profit3 = profit * 5.0m;
-                decimal profit4 = profit * 7.0m;
+                decimal profit2 = profit * 2.0m;
+                decimal profit3 = profit * 4.0m;
+
 
                 switch (openPosition.Direction)
                 {
                     case Side.Buy:
-                        decimal longStopPrice = tunnelDown + this.tunnel.Width * 0.2m;
+                        decimal longStopPrice = tunnelDown + this.tunnel.Width * 0.1m;
                         switch (openPosition.SignalTypeOpen)
                         {
                             case "L1":
@@ -292,10 +256,6 @@ namespace OsEngine.OsTrader.Panels
                                 this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
                                 break;
                             case "L4":
-                                this.bot.CloseAtProfit(openPosition, tunnelUp + profit4, tunnelUp + profit4 - slippage);
-                                this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
-                                break;
-                            case "L5":
                                 this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
                                 break;
                             default:
@@ -304,7 +264,7 @@ namespace OsEngine.OsTrader.Panels
                         }
                         break;
                     case Side.Sell:
-                        decimal shortStopPrice = tunnelUp - this.tunnel.Width * 0.2m;
+                        decimal shortStopPrice = tunnelUp - this.tunnel.Width * 0.1m;
                         switch (openPosition.SignalTypeOpen)
                         {
                             case "L1":
@@ -326,10 +286,6 @@ namespace OsEngine.OsTrader.Panels
                                 this.bot.CloseAtStop(openPosition, shortStopPrice, shortStopPrice + slippage);
                                 break;
                             case "L4":
-                                this.bot.CloseAtProfit(openPosition, tunnelDown - profit4, tunnelDown - profit4 + slippage);
-                                this.bot.CloseAtStop(openPosition, shortStopPrice, shortStopPrice + slippage);
-                                break;
-                            case "L5":
                                 this.bot.CloseAtStop(openPosition, shortStopPrice, shortStopPrice + slippage);
                                 break;
                             default:
