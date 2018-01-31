@@ -1825,7 +1825,7 @@ namespace OsEngine.OsTrader.Panels
             TabCreate(BotTabType.Index);
             _tab1 = TabsIndex[0];
 
-            _ma = new MovingAverage(name + "MovingAverage", false) { Lenght = 12, ColorBase = Color.DodgerBlue };
+            _ma = new MovingAverage(name + MovingAverage.IndicatorName, false) { Lenght = 12, ColorBase = Color.DodgerBlue };
             _ma = (MovingAverage)_tab1.CreateCandleIndicator(_ma, "Prime");
             _ma.Save();
 
