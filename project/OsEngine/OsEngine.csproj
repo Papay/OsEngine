@@ -271,7 +271,6 @@
     <Compile Include="Charts\CandleChart\Indicators\TrixUi.xaml.cs">
       <DependentUpon>TrixUi.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Charts\CandleChart\Indicators\TunnelUi.xaml.cs" />
     <Compile Include="Charts\CandleChart\Indicators\VerticalHorizontalFilter.cs" />
     <Compile Include="Charts\CandleChart\Indicators\VerticalHorizontalFilterUi.xaml.cs">
       <DependentUpon>VerticalHorizontalFilterUi.xaml</DependentUpon>
@@ -620,7 +619,6 @@
     <Compile Include="OsTrader\Gui\TesterUi.xaml.cs">
       <DependentUpon>TesterUi.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Charts\CandleChart\Indicators\Tunnel.cs" />
     <Page Include="Alerts\AlertMessageFullUi.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -768,10 +766,6 @@
     <Page Include="Charts\CandleChart\Indicators\TrixUi.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Charts\CandleChart\Indicators\TunnelUi.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Charts\CandleChart\Indicators\VerticalHorizontalFilterUi.xaml">
       <SubType>Designer</SubType>

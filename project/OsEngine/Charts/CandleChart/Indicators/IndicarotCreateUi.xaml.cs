@@ -100,7 +100,6 @@ namespace OsEngine.Charts.CandleChart.Indicators
             _gridViewIndicators.Rows.Add("Volume Oscillator");
             _gridViewIndicators.Rows.Add("Volume");
             _gridViewIndicators.Rows.Add("WilliamsRange");
-            _gridViewIndicators.Rows.Add(Tunnel.IndicatorName);
 
             if (_chartMaster.GetChartArea("TradeArea") == null)
             {
@@ -333,12 +332,6 @@ namespace OsEngine.Charts.CandleChart.Indicators
             {
                 TextBlockDescription.Text = "Pivot Points. Индикатор рассчитывающий уровни поддержки и сопротивления на основании High, Low, Close предидущего торгового дня ";
             }
-            if (_gridViewIndicators.SelectedCells[0].Value.ToString() == Tunnel.IndicatorName)
-            {
-                TextBlockDescription.Text = "Tunnel. Туннельный индикатор на основе скользящей средней с заданной шириной.";
-            }
-
-
         }
 
         public IIndicatorCandle IndicatorCandle;
@@ -1007,22 +1000,6 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 IndicatorCandle = new PivotPoints(_chartMaster.Name + name, true);
                 _chartMaster.CreateIndicator(IndicatorCandle, areaName);
             }
-            if (_gridViewIndicators.SelectedCells[0].Value.ToString() == Tunnel.IndicatorName)
-            {
-                string name = "";
-
-                for (int i = 0; i < 30; i++)
-                {
-                    if (_chartMaster.IndicatorIsCreate(_chartMaster.Name + Tunnel.IndicatorName + i) == false)
-                    {
-                        name = Tunnel.IndicatorName + i;
-                        break;
-                    }
-                }
-                IndicatorCandle = new Tunnel(_chartMaster.Name + name, true);
-                _chartMaster.CreateIndicator(IndicatorCandle, areaName);
-            }
-
 
             Close();
 

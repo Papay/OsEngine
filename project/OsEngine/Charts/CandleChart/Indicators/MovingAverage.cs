@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using OsEngine.Entity;
 
@@ -88,6 +89,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
     /// </summary>
     public class MovingAverage : IIndicatorCandle
     {
+        public static readonly string IndicatorName = "MovingAverage";
 
         /// <summary>
         /// конструктор с параметрами. Индикатор будет сохранять настройки
@@ -203,6 +205,11 @@ namespace OsEngine.Charts.CandleChart.Indicators
         public int Lenght { get; set; }
 
         /// <summary>
+        /// сдвиг индикатора по вертикали
+        /// </summary>
+        public decimal VShift { get; set; }
+
+        /// <summary>
         /// цвет машки
         /// </summary>
         public Color ColorBase { get; set; }
@@ -223,7 +230,6 @@ namespace OsEngine.Charts.CandleChart.Indicators
             }
             try
             {
-
                 using (StreamReader reader = new StreamReader(@"Engine\" + Name + @".txt"))
                 {
                     ColorBase = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
@@ -233,12 +239,11 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     Enum.TryParse(reader.ReadLine(), true, out TypePointsToSearch);
                     KaufmanFastEma = Convert.ToInt32(reader.ReadLine());
                     KaufmanSlowEma = Convert.ToInt32(reader.ReadLine());
+                    VShift = Convert.ToDecimal(reader.ReadLine(), CultureInfo.InvariantCulture);
                     reader.ReadLine();
 
                     reader.Close();
                 }
-
-
             }
             catch (Exception)
             {
@@ -262,6 +267,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
                     writer.WriteLine(TypePointsToSearch);
                     writer.WriteLine(KaufmanFastEma);
                     writer.WriteLine(KaufmanSlowEma);
+                    writer.WriteLine(VShift.ToString(CultureInfo.InvariantCulture));
                     writer.Close();
                 }
             }
@@ -500,7 +506,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             average = average/Lenght;
 
-            return Math.Round(average, 6);
+            return Math.Round(VShift + average, 6);
         }
 
         /// <summary>
@@ -572,7 +578,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 //result = a*p + (1 - a)*emaLast;
             }
 
-            return Math.Round(result,8);
+            return Math.Round(VShift + result, 8);
         }
 
         /// <summary>
@@ -596,8 +602,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             average = average / weights;
 
-            return Math.Round(average, 8);
-
+            return Math.Round(VShift + average, 8);
         }
 
         /// <summary>
@@ -692,8 +697,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             average = average / weights;
 
-            return Math.Round(average, 8);
-
+            return Math.Round(VShift + average, 8);
         }
 
 // рассчёт на массивах decimal. Этот блог для других индикаторов в основном
@@ -857,7 +861,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             average = average / Lenght;
 
-            return Math.Round(average, 6);
+            return Math.Round(VShift + average, 6);
         }
 
         /// <summary>
@@ -894,7 +898,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 //result = a*p + (1 - a)*emaLast;
             }
 
-            return Math.Round(result, 8);
+            return Math.Round(VShift + result, 8);
         }
 
         /// <summary>
@@ -912,7 +916,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
 
             for (int i = index, weight = Lenght; i > index - Lenght; i--, weight--)
             {
-                average += values[i] *weight;
+                average += values[i] * weight;
                 weights += weight;
             }
             if (weights == 0)
@@ -921,7 +925,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
             }
             average = average / weights;
 
-            return Math.Round(average,8);
+            return Math.Round(VShift + average, 8);
 
         }
 
@@ -1036,7 +1040,6 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 {
                     er = signal / noise;
                 }
-
                 
 
                 // 2 высчитываем коэффициент
@@ -1058,7 +1061,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 //result = emaLast + (aDunamic * (p - emaLast));
             }
 
-            return Math.Round(result, 5);
+            return Math.Round(VShift + result, 5);
         }
 
         private decimal GetValueKaufmanAdaptive(List<decimal> values, int index)
@@ -1090,7 +1093,6 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 }
 
 
-
                 // 2 высчитываем коэффициент
 
                 decimal aFast = Math.Round(2.0m / (KaufmanFastEma + 1), 6);
@@ -1110,7 +1112,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
                 //result = emaLast + (aDunamic * (p - emaLast));
             }
 
-            return Math.Round(result, 5);
+            return Math.Round(VShift + result, 5);
         }
     }
 }

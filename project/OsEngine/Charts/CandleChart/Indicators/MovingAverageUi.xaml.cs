@@ -37,6 +37,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
             TextBoxLenght.Text = _mA.Lenght.ToString();
             TextBoxKaufmanFast.Text = _mA.KaufmanFastEma.ToString();
             TextBoxKaufmanSlow.Text = _mA.KaufmanSlowEma.ToString();
+            TextBoxVShift.Text = _mA.VShift.ToString();
             HostColor.Child = new TextBox();
             HostColor.Child.BackColor = _mA.ColorBase;
 
@@ -49,7 +50,6 @@ namespace OsEngine.Charts.CandleChart.Indicators
             ComboBoxMovingType.SelectionChanged += ComboBoxMovingType_SelectionChanged;
 
             ComboBoxMovingType.SelectedItem = _mA.TypeCalculationAverage;
-            
 
             CheckBoxPaintOnOff.IsChecked = _mA.PaintOn;
             ComboBoxPriceField.Items.Add(PriceTypePoints.Open);
@@ -101,7 +101,7 @@ namespace OsEngine.Charts.CandleChart.Indicators
             _mA.PaintOn = CheckBoxPaintOnOff.IsChecked.Value;
             _mA.KaufmanFastEma = Convert.ToInt32(TextBoxKaufmanFast.Text);
             _mA.KaufmanSlowEma = Convert.ToInt32(TextBoxKaufmanSlow.Text);
-
+            _mA.VShift = Convert.ToDecimal(TextBoxVShift.Text);
 
             ComboBoxMovingType.Items.Add(MovingAverageTypeCalculation.Exponential);
             ComboBoxMovingType.Items.Add(MovingAverageTypeCalculation.Simple);
@@ -126,5 +126,9 @@ namespace OsEngine.Charts.CandleChart.Indicators
             HostColor.Child.BackColor = dialog.Color;
         }
 
+        private void ComboBoxPriceField_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }
