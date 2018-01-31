@@ -50,14 +50,16 @@ namespace OsEngine.OsTrader.Panels
             public StrategyParameterInt TunnelLength;
             public StrategyParameterInt TunnelWidth;
             public StrategyParameterInt Slippage;
+            public StrategyParameterInt Stoploss;
 
             public TunnelRobot(string name)
                 : base(name)
             {
                 this.Profit = CreateParameter("Profit", 0.12m, 0.10m, 1.0m, 0.01m);
-                this.Slippage = CreateParameter("Slippage", 1, 1, 10, 1);
-                this.TunnelLength = CreateParameter("Tunnel.Length", 140, 20, 200, 5);
-                this.TunnelWidth = CreateParameter("Tunnel.Width", 80, 20, 300, 10);
+                this.Slippage = CreateParameter("Slippage", 2, 1, 100, 1);
+                this.TunnelLength = CreateParameter("Tunnel.Length", 30, 20, 200, 5);
+                this.TunnelWidth = CreateParameter("Tunnel.Width", 40, 20, 300, 10);
+                this.Stoploss = CreateParameter("Stoploss", 75, 5, 100, 5);
 
                 TabCreate(BotTabType.Simple);
                 this.bot = this.TabsSimple[0];
@@ -238,11 +240,10 @@ namespace OsEngine.OsTrader.Panels
                 decimal profit2 = profit * 2.0m;
                 decimal profit3 = profit * 4.0m;
 
-
                 switch (openPosition.Direction)
                 {
                     case Side.Buy:
-                        decimal longStopPrice = tunnelDown + this.tunnel.Width * 0.5m;
+                        decimal longStopPrice = tunnelUp - this.tunnel.Width * (this.Stoploss.ValueInt / 100m);
                         switch (openPosition.SignalTypeOpen)
                         {
                             case "L1":
@@ -253,10 +254,7 @@ namespace OsEngine.OsTrader.Panels
                                 this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
                                 break;
                             case "L2":
-                                if ((lastCandle.Close - openPosition.EntryPrice) > profit3)
-                                    this.bot.CloseAtProfit(openPosition, openPosition.EntryPrice + profit3, openPosition.EntryPrice + profit3 - slippage);
-                                else
-                                    this.bot.CloseAtProfit(openPosition, tunnelUp + profit2, tunnelUp + profit2 - slippage);
+                                this.bot.CloseAtProfit(openPosition, tunnelUp + profit2, tunnelUp + profit2 - slippage);
                                 this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
                                 break;
                             case "L3":
@@ -272,7 +270,7 @@ namespace OsEngine.OsTrader.Panels
                         }
                         break;
                     case Side.Sell:
-                        decimal shortStopPrice = tunnelUp - this.tunnel.Width * 0.5m;
+                        decimal shortStopPrice = tunnelDown + this.tunnel.Width * (this.Stoploss.ValueInt / 100m);
                         switch (openPosition.SignalTypeOpen)
                         {
                             case "L1":
@@ -283,10 +281,7 @@ namespace OsEngine.OsTrader.Panels
                                 this.bot.CloseAtStop(openPosition, shortStopPrice, shortStopPrice + slippage);
                                 break;
                             case "L2":
-                                if ((openPosition.EntryPrice - lastCandle.Close) > profit3)
-                                    this.bot.CloseAtProfit(openPosition, openPosition.EntryPrice - profit3, openPosition.EntryPrice - profit3 + slippage);
-                                else
-                                    this.bot.CloseAtProfit(openPosition, tunnelDown - profit2, tunnelDown - profit2 + slippage);
+                                this.bot.CloseAtProfit(openPosition, tunnelDown - profit2, tunnelDown - profit2 + slippage);
                                 this.bot.CloseAtStop(openPosition, shortStopPrice, shortStopPrice + slippage);
                                 break;
                             case "L3":
