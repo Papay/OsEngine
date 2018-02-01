@@ -36,16 +36,14 @@ namespace OsEngine.OsTrader.Panels
             public static string RobotName = "Tunnel Robot";
 
             private readonly BotTabSimple bot;
-        
-            //private readonly Tunnel tunnel;
+            private BotTradeRegime regime;
+
             private readonly MovingAverage sma;
 
             private readonly int Volume1;
             private readonly int Volume2;
             private readonly int Volume3;
             private readonly int Volume4;
-
-            private BotTradeRegime regime;
         
             public StrategyParameterDecimal Profit;
             public StrategyParameterInt TunnelLength;

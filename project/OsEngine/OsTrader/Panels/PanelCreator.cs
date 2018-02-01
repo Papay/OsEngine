@@ -67,7 +67,8 @@ namespace OsEngine.OsTrader.Panels
             result.Add("FirstBot");
 
             result.Add(TunnelRobot.RobotName);
-                
+            result.Add(InTunnelRobot.RobotName);
+
             return result;
         }
 
@@ -219,10 +220,13 @@ namespace OsEngine.OsTrader.Panels
             {
                 bot = new PairTraderSpreadSma(name);
             }
-            
             if (nameClass == TunnelRobot.RobotName)
             {
                 bot = new TunnelRobot(name);
+            }
+            if (nameClass == InTunnelRobot.RobotName)
+            {
+                bot = new InTunnelRobot(name);
             }
             return bot;
         }
