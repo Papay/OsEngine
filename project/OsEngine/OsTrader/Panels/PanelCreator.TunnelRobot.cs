@@ -146,7 +146,7 @@ namespace OsEngine.OsTrader.Panels
 
                 List<Position> openPositions = this.bot.PositionsOpenAll;
 
-                if (openPositions?.Count == 0)
+                if (openPositions == null || openPositions.Count == 0)
                 {
                     if (this.regime == BotTradeRegime.OnlyClosePosition)
                         return;
@@ -155,7 +155,7 @@ namespace OsEngine.OsTrader.Panels
                 }
                 else
                 {
-                    for (int i = 0; i < openPositions?.Count; i++)
+                    for (int i = 0; i < openPositions.Count; i++)
                     {
                         this.LogicClosePosition(candles, openPositions[i]);
                     }
@@ -180,8 +180,8 @@ namespace OsEngine.OsTrader.Panels
             /// <param name="openPositions"></param>
             private void LogicOpenPosition(List<Candle> candles, List<Position> openPositions)
             {
-                Candle lastCandle = candles[candles.Count - 1];
-                decimal smaValue = this.sma.Values[this.sma.Values.Count - 1];
+                Candle lastCandle = candles.Last();
+                decimal smaValue = this.sma.Values.Last();
                 decimal tunnelUp = smaValue + this.TunnelWidth.ValueInt * 0.5m;
                 decimal tunnelDown = smaValue - this.TunnelWidth.ValueInt * 0.5m;
                 decimal slippage = this.Slippage.ValueInt * this.bot.Securiti.PriceStep;
@@ -197,7 +197,9 @@ namespace OsEngine.OsTrader.Panels
                         return;
 
                     if (lastCandle.Close < tunnelUp + profit1)
+                    {
                         this.bot.BuyAtMarket(this.Volume1, "L1");
+                    }
                     if (lastCandle.Close < tunnelUp + profit2)
                     {
                         this.bot.BuyAtMarket(this.Volume2, "L2");
@@ -212,7 +214,9 @@ namespace OsEngine.OsTrader.Panels
                         return;
 
                     if (lastCandle.Close > tunnelDown - profit1)
+                    {
                         this.bot.SellAtMarket(this.Volume1, "L1");
+                    }
                     if (lastCandle.Close > tunnelDown - profit2)
                     {
                         this.bot.SellAtMarket(this.Volume2, "L2");
@@ -230,7 +234,7 @@ namespace OsEngine.OsTrader.Panels
             private void LogicClosePosition(List<Candle> candles, Position openPosition)
             {
                 Candle lastCandle = candles.Last();
-                decimal smaValue = this.sma.Values[this.sma.Values.Count - 1];
+                decimal smaValue = this.sma.Values.Last();
                 decimal tunnelUp = smaValue + this.TunnelWidth.ValueInt * 0.5m;
                 decimal tunnelDown = smaValue - this.TunnelWidth.ValueInt * 0.5m;
                 decimal slippage = this.Slippage.ValueInt * this.bot.Securiti.PriceStep;
