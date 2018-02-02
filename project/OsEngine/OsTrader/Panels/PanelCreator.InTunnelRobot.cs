@@ -39,9 +39,9 @@ namespace OsEngine.OsTrader.Panels
 
             private StrategyParameterInt TunnelLength;
             private StrategyParameterInt TunnelWidth;
-            public StrategyParameterInt Slippage;
-            public StrategyParameterInt Volume;
-
+            private StrategyParameterInt Slippage;
+            private StrategyParameterInt Volume;
+            private StrategyParameterDecimal Stoploss;
 
             public InTunnelRobot(string name)
                 : base(name)
@@ -50,9 +50,9 @@ namespace OsEngine.OsTrader.Panels
                 this.bot = this.TabsSimple[0];
 
                 this.TunnelLength = CreateParameter("Tunnel.Length", 30, 10, 200, 5);
-                this.TunnelWidth = CreateParameter("Tunnel.Width", 10, 1, 500, 1);
-                this.Slippage = CreateParameter("Slippage", 2, 1, 100, 1);
-
+                this.TunnelWidth = CreateParameter("Tunnel.Width", 80, 1, 500, 1);
+                this.Slippage = CreateParameter("Slippage", 1, 1, 100, 1);
+                this.Stoploss = CreateParameter("Stoploss", 0.11m, 0.11m, 10m, 0.01m);
                 this.Volume = CreateParameter("Volume", 1, 1, 100, 1);
 
                 this.sma = new MovingAverage(name + MovingAverage.IndicatorName, false)
@@ -140,14 +140,15 @@ namespace OsEngine.OsTrader.Panels
                 decimal tunnelUp = smaValue + this.TunnelWidth.ValueInt * 0.5m;
                 decimal tunnelDown = smaValue - this.TunnelWidth.ValueInt * 0.5m;
                 decimal slippage = this.Slippage.ValueInt * this.bot.Securiti.PriceStep;
+                decimal stoploss = smaValue * decimal.Divide(this.Stoploss.ValueDecimal, 100m);
 
-				if (lastCandel.Low > tunnelUp + this.TunnelWidth.ValueInt)
+                if (lastCandel.Close > tunnelUp + stoploss)
                 {
-                    this.bot.SellAtStop(this.Volume.ValueInt, tunnelUp + this.TunnelWidth.ValueInt - slippage, tunnelUp + this.TunnelWidth.ValueInt + slippage, StopActivateType.LowerOrEqyal);
+                    this.bot.SellAtStop(this.Volume.ValueInt, tunnelUp + slippage, tunnelUp, StopActivateType.LowerOrEqyal);
                 }
-                if (lastCandel.High < tunnelDown - this.TunnelWidth.ValueInt)
+                if (lastCandel.Close < tunnelDown - stoploss)
                 {
-                    this.bot.BuyAtStop(this.Volume.ValueInt, tunnelDown - this.TunnelWidth.ValueInt + slippage, tunnelDown - this.TunnelWidth.ValueInt - slippage, StopActivateType.HigherOrEqual);
+                    this.bot.BuyAtStop(this.Volume.ValueInt, tunnelDown + slippage, tunnelDown, StopActivateType.HigherOrEqual);
                 }
             }
 
@@ -159,33 +160,30 @@ namespace OsEngine.OsTrader.Panels
                 decimal tunnelUp = smaValue + this.TunnelWidth.ValueInt * 0.5m;
                 decimal tunnelDown = smaValue - this.TunnelWidth.ValueInt * 0.5m;
                 decimal slippage = this.Slippage.ValueInt * this.bot.Securiti.PriceStep;
+                decimal stoploss = smaValue * decimal.Divide(this.Stoploss.ValueDecimal, 100m);
 
                 switch (position.Direction)
                 {
                     case Side.Buy:
-						if (lastCandel.High > smaValue)
+                        if (lastCandel.High > tunnelUp)
                         {
-                            this.bot.CloseAtTrailingStop(position, smaValue, smaValue - slippage);
+                            this.bot.CloseAtTrailingStop(position, tunnelUp, tunnelUp - slippage);
                         }
-						else
+                        else
                         {
-                            decimal longStopPrice = position.EntryPrice - this.TunnelWidth.ValueInt * 0.25m;
-
-                            this.bot.CloseAtProfit(position, smaValue, smaValue - slippage);
+                            decimal longStopPrice = position.EntryPrice - stoploss;
                             this.bot.CloseAtStop(position, longStopPrice, longStopPrice - slippage);
                         }
                         break;
 
                     case Side.Sell:
-						if (lastCandel.Low < smaValue)
+                        if (lastCandel.Low < tunnelDown)
                         {
-                            this.bot.CloseAtTrailingStop(position, smaValue, smaValue + slippage);
+                            this.bot.CloseAtTrailingStop(position, tunnelDown, tunnelDown + slippage);
                         }
-						else
+                        else
                         {
-                            decimal longShortPrice = position.EntryPrice + this.TunnelWidth.ValueInt * 0.25m;
-
-                            this.bot.CloseAtProfit(position, smaValue, smaValue + slippage);
+                            decimal longShortPrice = position.EntryPrice + stoploss;
                             this.bot.CloseAtStop(position, longShortPrice, longShortPrice + slippage);
                         }
                         break;
