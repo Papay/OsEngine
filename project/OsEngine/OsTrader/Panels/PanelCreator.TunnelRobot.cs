@@ -36,14 +36,14 @@ namespace OsEngine.OsTrader.Panels
             public static string RobotName = "Tunnel Robot";
 
             private readonly BotTabSimple bot;
-            private BotTradeRegime regime;
+            private StrategyParameterString Regime; // BotTradeRegime
 
             private readonly MovingAverage sma;
 
-            private readonly int Volume1;
-            private readonly int Volume2;
-            private readonly int Volume3;
-            private readonly int Volume4;
+            private StrategyParameterInt Volume1;
+            private StrategyParameterInt Volume2;
+            private StrategyParameterInt Volume3;
+            private StrategyParameterInt Volume4;
         
             public StrategyParameterDecimal Profit;
             public StrategyParameterInt TunnelLength;
@@ -54,11 +54,16 @@ namespace OsEngine.OsTrader.Panels
             public TunnelRobot(string name)
                 : base(name)
             {
-                this.Profit = CreateParameter("Profit", 0.12m, 0.10m, 1.0m, 0.01m);
-                this.Slippage = CreateParameter("Slippage", 2, 1, 100, 1);
+                this.Regime = CreateParameter("Regime", Enum.GetName(typeof(BotTradeRegime), BotTradeRegime.Off), Enum.GetNames(typeof(BotTradeRegime)));
+                this.Profit = CreateParameter("Profit", 0.3m, 0.10m, 1.0m, 0.01m);
+                this.Slippage = CreateParameter("Slippage", 1, 1, 100, 1);
                 this.TunnelLength = CreateParameter("Tunnel.Length", 30, 20, 200, 5);
-                this.TunnelWidth = CreateParameter("Tunnel.Width", 40, 20, 300, 10);
-                this.Stoploss = CreateParameter("Stoploss", 75, 5, 100, 5);
+                this.TunnelWidth = CreateParameter("Tunnel.Width", 70, 20, 300, 10);
+                this.Stoploss = CreateParameter("Stoploss", 90, 5, 100, 5);
+                this.Volume1 = CreateParameter("Volume1", 3, 1, 3, 1);
+                this.Volume2 = CreateParameter("Volume2", 2, 1, 3, 1);
+                this.Volume3 = CreateParameter("Volume3", 1, 1, 3, 1);
+                this.Volume4 = CreateParameter("Volume4", 2, 1, 3, 1);
 
                 TabCreate(BotTabType.Simple);
                 this.bot = this.TabsSimple[0];
@@ -72,13 +77,6 @@ namespace OsEngine.OsTrader.Panels
                 };
                 this.sma = (MovingAverage)this.bot.CreateCandleIndicator(this.sma, "Prime");
                 this.sma.Save();
-
-                this.Volume1 = 2;
-                this.Volume2 = 1;
-                this.Volume3 = 1;
-                this.Volume4 = 2;
-
-                this.regime = BotTradeRegime.On;
 
                 this.bot.CandleFinishedEvent += this.OnCandleFinishedEvent;
 
@@ -109,8 +107,6 @@ namespace OsEngine.OsTrader.Panels
                 {
                     using (StreamReader reader = new StreamReader(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt"))
                     {
-                        Enum.TryParse(reader.ReadLine(), true, out this.regime);
-
                         reader.Close();
                     }
                 }
@@ -130,7 +126,7 @@ namespace OsEngine.OsTrader.Panels
 
             private void OnCandleFinishedEvent(List<Candle> candles)
             {
-                if (this.regime == BotTradeRegime.Off)
+                if (this.Regime.ValueString == Enum.GetName(typeof(BotTradeRegime), BotTradeRegime.Off))
                     return;
 
                 if (ServerMaster.StartProgram == ServerStartProgramm.IsOsTrader 
@@ -146,7 +142,7 @@ namespace OsEngine.OsTrader.Panels
 
                 if (openPositions == null || openPositions.Count == 0)
                 {
-                    if (this.regime == BotTradeRegime.OnlyClosePosition)
+                    if (this.Regime.ValueString == Enum.GetName(typeof(BotTradeRegime), BotTradeRegime.OnlyClosePosition))
                         return;
 
                     this.LogicOpenPosition(candles, openPositions);
@@ -186,40 +182,40 @@ namespace OsEngine.OsTrader.Panels
 
                 decimal profit = decimal.Multiply(lastCandle.Close, this.Profit.ValueDecimal / 100m);
                 decimal profit1 = profit * 1.0m;
-                decimal profit2 = profit * 2.0m;
-                decimal profit3 = profit * 4.0m;
+                decimal profit2 = profit * 2.5m;
+                decimal profit3 = profit * 5.0m;
                 
                 if (lastCandle.High >= tunnelUp)
                 {
-                    if (this.regime == BotTradeRegime.OnlyShort)
+                    if (this.Regime.ValueString == Enum.GetName(typeof(BotTradeRegime), BotTradeRegime.OnlyShort))
                         return;
 
                     if (lastCandle.Close < tunnelUp + profit1)
                     {
-                        this.bot.BuyAtMarket(this.Volume1, "L1");
+                        this.bot.BuyAtMarket(this.Volume1.ValueInt, "L1");
                     }
                     if (lastCandle.Close < tunnelUp + profit2)
                     {
-                        this.bot.BuyAtMarket(this.Volume2, "L2");
-                        this.bot.BuyAtMarket(this.Volume3, "L3");
-                        this.bot.BuyAtMarket(this.Volume4, "L4");
+                        this.bot.BuyAtMarket(this.Volume2.ValueInt, "L2");
+                        this.bot.BuyAtMarket(this.Volume3.ValueInt, "L3");
+                        this.bot.BuyAtMarket(this.Volume4.ValueInt, "L4");
                     }
                 }
                     
                 if (lastCandle.Low <= tunnelDown)
                 {
-                    if (this.regime == BotTradeRegime.OnlyLong)
+                    if (this.Regime.ValueString == Enum.GetName(typeof(BotTradeRegime), BotTradeRegime.OnlyLong))
                         return;
 
                     if (lastCandle.Close > tunnelDown - profit1)
                     {
-                        this.bot.SellAtMarket(this.Volume1, "L1");
+                        this.bot.SellAtMarket(this.Volume1.ValueInt, "L1");
                     }
                     if (lastCandle.Close > tunnelDown - profit2)
                     {
-                        this.bot.SellAtMarket(this.Volume2, "L2");
-                        this.bot.SellAtMarket(this.Volume3, "L3");
-                        this.bot.SellAtMarket(this.Volume4, "L4");
+                        this.bot.SellAtMarket(this.Volume2.ValueInt, "L2");
+                        this.bot.SellAtMarket(this.Volume3.ValueInt, "L3");
+                        this.bot.SellAtMarket(this.Volume4.ValueInt, "L4");
                     }
                 }
             }
@@ -239,8 +235,8 @@ namespace OsEngine.OsTrader.Panels
 
                 decimal profit = decimal.Multiply(lastCandle.Close, this.Profit.ValueDecimal / 100m);
                 decimal profit1 = profit * 1.0m;
-                decimal profit2 = profit * 2.0m;
-                decimal profit3 = profit * 4.0m;
+                decimal profit2 = profit * 2.5m;
+                decimal profit3 = profit * 5.0m;
 
                 switch (openPosition.Direction)
                 {

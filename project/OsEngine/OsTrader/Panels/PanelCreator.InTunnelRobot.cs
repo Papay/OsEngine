@@ -33,7 +33,7 @@ namespace OsEngine.OsTrader.Panels
             public static string RobotName = "InTunnel Robot";
 
             private readonly BotTabSimple bot;
-            private BotTradeRegime regime;
+            private StrategyParameterString Regime; // BotTradeRegime
 
             private readonly MovingAverage sma;
 
@@ -49,10 +49,11 @@ namespace OsEngine.OsTrader.Panels
                 TabCreate(BotTabType.Simple);
                 this.bot = this.TabsSimple[0];
 
+                this.Regime = CreateParameter("Regime", Enum.GetName(typeof(BotTradeRegime), BotTradeRegime.Off), Enum.GetNames(typeof(BotTradeRegime)));
                 this.TunnelLength = CreateParameter("Tunnel.Length", 30, 10, 200, 5);
-                this.TunnelWidth = CreateParameter("Tunnel.Width", 80, 1, 500, 1);
+                this.TunnelWidth = CreateParameter("Tunnel.Width", 70, 1, 500, 1);
                 this.Slippage = CreateParameter("Slippage", 1, 1, 100, 1);
-                this.Stoploss = CreateParameter("Stoploss", 0.11m, 0.11m, 10m, 0.01m);
+                this.Stoploss = CreateParameter("Stoploss", 0.11m, 0.10m, 10m, 0.01m);
                 this.Volume = CreateParameter("Volume", 1, 1, 100, 1);
 
                 this.sma = new MovingAverage(name + MovingAverage.IndicatorName, false)
@@ -64,8 +65,6 @@ namespace OsEngine.OsTrader.Panels
                 };
                 this.sma = (MovingAverage)this.bot.CreateCandleIndicator(this.sma, "Prime");
                 this.sma.Save();
-
-                this.regime = BotTradeRegime.On;
 
                 this.bot.CandleFinishedEvent += this.OnCandleFinishedEvent;
 
@@ -93,7 +92,7 @@ namespace OsEngine.OsTrader.Panels
 
             private void OnCandleFinishedEvent(List<Candle> candles)
             {
-                if (this.regime == BotTradeRegime.Off)
+                if (this.Regime.ValueString == Enum.GetName(typeof(BotTradeRegime), BotTradeRegime.Off))
                     return;
 
                 if (ServerMaster.StartProgram == ServerStartProgramm.IsOsTrader
@@ -109,7 +108,7 @@ namespace OsEngine.OsTrader.Panels
 
                 if (openPositions == null || openPositions.Count == 0)
                 {
-                    if (this.regime == BotTradeRegime.OnlyClosePosition)
+                    if (this.Regime.ValueString == Enum.GetName(typeof(BotTradeRegime), BotTradeRegime.OnlyClosePosition))
                         return;
 
                     this.LogicOpenPosition(candles);
@@ -142,13 +141,13 @@ namespace OsEngine.OsTrader.Panels
                 decimal slippage = this.Slippage.ValueInt * this.bot.Securiti.PriceStep;
                 decimal stoploss = smaValue * decimal.Divide(this.Stoploss.ValueDecimal, 100m);
 
-                if (lastCandel.Close > tunnelUp + stoploss)
+                if (lastCandel.High < tunnelUp)
                 {
-                    this.bot.SellAtStop(this.Volume.ValueInt, tunnelUp + slippage, tunnelUp, StopActivateType.LowerOrEqyal);
+                    this.bot.SellAtLimit(this.Volume.ValueInt, tunnelUp + stoploss, "L1");
                 }
-                if (lastCandel.Close < tunnelDown - stoploss)
+                if (lastCandel.Low > tunnelDown)
                 {
-                    this.bot.BuyAtStop(this.Volume.ValueInt, tunnelDown + slippage, tunnelDown, StopActivateType.HigherOrEqual);
+                    this.bot.BuyAtLimit(this.Volume.ValueInt, tunnelDown - stoploss, "L1");
                 }
             }
 
