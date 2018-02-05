@@ -67,9 +67,32 @@ namespace OsEngine.OsTrader.Panels
                 this.sma.Save();
 
                 this.bot.CandleFinishedEvent += this.OnCandleFinishedEvent;
+                this.bot.PositionOpeningSuccesEvent += this.OnPositionOpeningSuccesEvent;
 
                 this.DeleteEvent += this.OnDeleteEvent;
                 this.ParametrsChangeByUser += this.OnParametrsChangeByUser;
+            }
+
+            private void OnPositionOpeningSuccesEvent(Position position)
+            {
+                decimal smaValue = this.sma.Values.Last();
+                decimal tunnelUp = smaValue + this.TunnelWidth.ValueInt * 0.5m;
+                decimal tunnelDown = smaValue - this.TunnelWidth.ValueInt * 0.5m;
+                decimal slippage = this.Slippage.ValueInt * this.bot.Securiti.PriceStep;
+                decimal stoploss = smaValue * decimal.Divide(this.Stoploss.ValueDecimal, 100m);
+
+                switch(position.Direction)
+                {
+                    case Side.Buy:
+                        decimal longStopPrice = position.EntryPrice - stoploss;
+                        this.bot.CloseAtStop(position, longStopPrice, longStopPrice - slippage);
+                        break;
+                    case Side.Sell:
+                        decimal longShortPrice = position.EntryPrice + stoploss;
+                        this.bot.CloseAtStop(position, longShortPrice, longShortPrice + slippage);
+                        break;
+                }
+
             }
 
             private void OnParametrsChangeByUser()

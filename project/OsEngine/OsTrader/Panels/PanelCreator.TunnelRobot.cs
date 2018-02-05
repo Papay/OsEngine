@@ -79,6 +79,8 @@ namespace OsEngine.OsTrader.Panels
                 this.sma.Save();
 
                 this.bot.CandleFinishedEvent += this.OnCandleFinishedEvent;
+                this.bot.PositionOpeningSuccesEvent += this.OnPositionOpeningSuccesEvent;
+                this.bot.PositionOpeningFailEvent += this.OnPositionOpeningFailEvent;
 
                 this.DeleteEvent += this.OnDeleteEvent;
                 this.ParametrsChangeByUser += this.OnParametrsChangeByUser;
@@ -116,6 +118,41 @@ namespace OsEngine.OsTrader.Panels
                 }
             }
 
+            public override string GetNameStrategyType()
+            {
+                return RobotName;
+            }
+
+            public override void ShowIndividualSettingsDialog()
+            {
+                //TunnelRobotUi dialog = new TunnelRobotUi(this);
+                //dialog.ShowDialog();
+            }
+
+            private void OnPositionOpeningSuccesEvent(Position position)
+            {
+                decimal smaValue = this.sma.Values.Last();
+                decimal tunnelUp = smaValue + this.TunnelWidth.ValueInt * 0.5m;
+                decimal tunnelDown = smaValue - this.TunnelWidth.ValueInt * 0.5m;
+                decimal slippage = this.Slippage.ValueInt * this.bot.Securiti.PriceStep;
+
+                switch (position.Direction)
+                {
+                    case Side.Buy:
+                        decimal longStopPrice = tunnelUp - this.TunnelWidth.ValueInt * (this.Stoploss.ValueInt / 100m);
+                        this.bot.CloseAtStop(position, longStopPrice, longStopPrice - slippage);
+                        break;
+                    case Side.Sell:
+                        decimal shortStopPrice = tunnelDown + this.TunnelWidth.ValueInt * (this.Stoploss.ValueInt / 100m);
+                        this.bot.CloseAtStop(position, shortStopPrice, shortStopPrice + slippage);
+                        break;
+                }
+            }
+
+            private void OnPositionOpeningFailEvent(Position obj)
+            {
+            }
+
             private void OnDeleteEvent()
             {
                 if (File.Exists(@"Engine\" + NameStrategyUniq + @"SettingsBot.txt"))
@@ -129,7 +166,7 @@ namespace OsEngine.OsTrader.Panels
                 if (this.Regime.ValueString == Enum.GetName(typeof(BotTradeRegime), BotTradeRegime.Off))
                     return;
 
-                if (ServerMaster.StartProgram == ServerStartProgramm.IsOsTrader 
+                if (ServerMaster.StartProgram == ServerStartProgramm.IsOsTrader
                     && (DateTime.Now.Hour < 9 || DateTime.Now.Hour > 23))
                 {
                     return;
@@ -154,17 +191,6 @@ namespace OsEngine.OsTrader.Panels
                         this.LogicClosePosition(candles, openPositions[i]);
                     }
                 }
-            }
-
-            public override string GetNameStrategyType()
-            {
-                return RobotName;
-            }
-
-            public override void ShowIndividualSettingsDialog()
-            {
-                //TunnelRobotUi dialog = new TunnelRobotUi(this);
-                //dialog.ShowDialog();
             }
 
             /// <summary>
