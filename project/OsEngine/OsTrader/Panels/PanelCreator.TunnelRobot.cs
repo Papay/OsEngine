@@ -80,8 +80,9 @@ namespace OsEngine.OsTrader.Panels
 
                 this.bot.CandleFinishedEvent += this.OnCandleFinishedEvent;
                 this.bot.PositionOpeningSuccesEvent += this.OnPositionOpeningSuccesEvent;
-                this.bot.PositionOpeningFailEvent += this.OnPositionOpeningFailEvent;
 
+                this.bot.PositionOpeningFailEvent += this.OnPositionOpeningFailEvent;
+                this.bot.PositionClosingFailEvent += this.OnPositionClosingFailEvent;
                 this.DeleteEvent += this.OnDeleteEvent;
                 this.ParametrsChangeByUser += this.OnParametrsChangeByUser;
             }
@@ -149,8 +150,14 @@ namespace OsEngine.OsTrader.Panels
                 }
             }
 
-            private void OnPositionOpeningFailEvent(Position obj)
+            private void OnPositionOpeningFailEvent(Position position)
             {
+                this.bot.CloseAtMarket(position, position.OpenVolume);
+            }
+
+            private void OnPositionClosingFailEvent(Position position)
+            {
+                this.bot.CloseAtMarket(position, position.OpenVolume);
             }
 
             private void OnDeleteEvent()
