@@ -45,7 +45,10 @@ namespace OsEngine.OsTrader.Panels
             private StrategyParameterInt Volume3;
             private StrategyParameterInt Volume4;
         
-            public StrategyParameterDecimal Profit;
+            public StrategyParameterDecimal Profit1;
+            public StrategyParameterDecimal Profit2;
+            public StrategyParameterDecimal Profit3;
+
             public StrategyParameterInt TunnelLength;
             public StrategyParameterInt TunnelWidth;
             public StrategyParameterInt Slippage;
@@ -55,10 +58,12 @@ namespace OsEngine.OsTrader.Panels
                 : base(name)
             {
                 this.Regime = CreateParameter("Regime", Enum.GetName(typeof(BotTradeRegime), BotTradeRegime.Off), Enum.GetNames(typeof(BotTradeRegime)));
-                this.Profit = CreateParameter("Profit", 0.3m, 0.10m, 1.0m, 0.01m);
+                this.Profit1 = CreateParameter("Profit1", 0.15m, 0.10m, 1.0m, 0.01m);
+                this.Profit2 = CreateParameter("Profit2", 0.20m, 0.10m, 1.0m, 0.01m);
+                this.Profit3 = CreateParameter("Profit3", 0.25m, 0.10m, 1.0m, 0.01m);
                 this.Slippage = CreateParameter("Slippage", 1, 1, 100, 1);
                 this.TunnelLength = CreateParameter("Tunnel.Length", 30, 20, 200, 5);
-                this.TunnelWidth = CreateParameter("Tunnel.Width", 70, 20, 300, 10);
+                this.TunnelWidth = CreateParameter("Tunnel.Width", 60, 20, 300, 10);
                 this.Stoploss = CreateParameter("Stoploss", 90, 5, 100, 5);
                 this.Volume1 = CreateParameter("Volume1", 3, 1, 3, 1);
                 this.Volume2 = CreateParameter("Volume2", 2, 1, 3, 1);
@@ -81,8 +86,6 @@ namespace OsEngine.OsTrader.Panels
                 this.bot.CandleFinishedEvent += this.OnCandleFinishedEvent;
                 this.bot.PositionOpeningSuccesEvent += this.OnPositionOpeningSuccesEvent;
 
-                this.bot.PositionOpeningFailEvent += this.OnPositionOpeningFailEvent;
-                this.bot.PositionClosingFailEvent += this.OnPositionClosingFailEvent;
                 this.DeleteEvent += this.OnDeleteEvent;
                 this.ParametrsChangeByUser += this.OnParametrsChangeByUser;
             }
@@ -126,8 +129,6 @@ namespace OsEngine.OsTrader.Panels
 
             public override void ShowIndividualSettingsDialog()
             {
-                //TunnelRobotUi dialog = new TunnelRobotUi(this);
-                //dialog.ShowDialog();
             }
 
             private void OnPositionOpeningSuccesEvent(Position position)
@@ -148,16 +149,6 @@ namespace OsEngine.OsTrader.Panels
                         this.bot.CloseAtStop(position, shortStopPrice, shortStopPrice + slippage);
                         break;
                 }
-            }
-
-            private void OnPositionOpeningFailEvent(Position position)
-            {
-                this.bot.CloseAtMarket(position, position.OpenVolume);
-            }
-
-            private void OnPositionClosingFailEvent(Position position)
-            {
-                this.bot.CloseAtMarket(position, position.OpenVolume);
             }
 
             private void OnDeleteEvent()
@@ -213,11 +204,10 @@ namespace OsEngine.OsTrader.Panels
                 decimal tunnelDown = smaValue - this.TunnelWidth.ValueInt * 0.5m;
                 decimal slippage = this.Slippage.ValueInt * this.bot.Securiti.PriceStep;
 
-                decimal profit = decimal.Multiply(lastCandle.Close, this.Profit.ValueDecimal / 100m);
-                decimal profit1 = profit * 1.0m;
-                decimal profit2 = profit * 2.5m;
-                decimal profit3 = profit * 5.0m;
-                
+                decimal profit1 = decimal.Multiply(smaValue, this.Profit1.ValueDecimal / 100m);
+                decimal profit2 = decimal.Multiply(smaValue, this.Profit2.ValueDecimal / 100m);
+                decimal profit3 = decimal.Multiply(smaValue, this.Profit3.ValueDecimal / 100m);
+
                 if (lastCandle.High >= tunnelUp)
                 {
                     if (this.Regime.ValueString == Enum.GetName(typeof(BotTradeRegime), BotTradeRegime.OnlyShort))
@@ -266,10 +256,9 @@ namespace OsEngine.OsTrader.Panels
                 decimal tunnelDown = smaValue - this.TunnelWidth.ValueInt * 0.5m;
                 decimal slippage = this.Slippage.ValueInt * this.bot.Securiti.PriceStep;
 
-                decimal profit = decimal.Multiply(lastCandle.Close, this.Profit.ValueDecimal / 100m);
-                decimal profit1 = profit * 1.0m;
-                decimal profit2 = profit * 2.5m;
-                decimal profit3 = profit * 5.0m;
+                decimal profit1 = decimal.Multiply(smaValue, this.Profit1.ValueDecimal / 100m);
+                decimal profit2 = decimal.Multiply(smaValue, this.Profit2.ValueDecimal / 100m);
+                decimal profit3 = decimal.Multiply(smaValue, this.Profit3.ValueDecimal / 100m);
 
                 switch (openPosition.Direction)
                 {
@@ -299,8 +288,9 @@ namespace OsEngine.OsTrader.Panels
                                 this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
                                 break;
                             default:
-                                throw new InvalidOperationException(
-                                    $"Unexpectted long position with signal type open: {openPosition.SignalTypeOpen}");
+                                //throw new InvalidOperationException($"Unexpectted long position with signal type open: {openPosition.SignalTypeOpen}");
+                                this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
+                                break;
                         }
                         break;
                     case Side.Sell:
@@ -329,8 +319,9 @@ namespace OsEngine.OsTrader.Panels
                                 this.bot.CloseAtStop(openPosition, shortStopPrice, shortStopPrice + slippage);
                                 break;
                             default:
-                                throw new InvalidOperationException(
-                                    $"Unexpectted short position with signal type open: {openPosition.SignalTypeOpen}");
+                                //throw new InvalidOperationException($"Unexpectted short position with signal type open: {openPosition.SignalTypeOpen}");
+                                this.bot.CloseAtStop(openPosition, shortStopPrice, shortStopPrice + slippage);
+                                break;
                         }
                         break;
                 }

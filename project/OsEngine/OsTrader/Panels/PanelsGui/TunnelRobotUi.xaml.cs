@@ -19,12 +19,12 @@ namespace OsEngine.OsTrader.Panels.PanelsGui
             InitializeComponent();
             this.robot = robot;
 
-            this.ProfitBox.Text = this.robot.Profit.ValueDecimal.ToString();
+            //this.ProfitBox.Text = this.robot.Profit.ValueDecimal.ToString();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            this.robot.Profit.ValueDecimal = Convert.ToDecimal(this.ProfitBox.Text);
+            //this.robot.Profit.ValueDecimal = Convert.ToDecimal(this.ProfitBox.Text);
             Close();
         }
     }
