@@ -16,6 +16,8 @@ namespace OsEngine.Charts.CandleChart.Indicators
     /// </summary>
     public class Ichimoku : IIndicatorCandle
     {
+        public static readonly string IndicatorName = "Ichimoku";
+
         /// <summary>
         /// конструктор с параметром. Сохраняется
         /// </summary>

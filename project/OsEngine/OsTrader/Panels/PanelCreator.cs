@@ -68,6 +68,7 @@ namespace OsEngine.OsTrader.Panels
 
             result.Add(TunnelRobot.RobotName);
             result.Add(InTunnelRobot.RobotName);
+            result.Add(IchimokuRobot.RobotName);
 
             return result;
         }
@@ -227,6 +228,10 @@ namespace OsEngine.OsTrader.Panels
             if (nameClass == InTunnelRobot.RobotName)
             {
                 bot = new InTunnelRobot(name);
+            }
+            if (nameClass == IchimokuRobot.RobotName)
+            {
+                bot = new IchimokuRobot(name);
             }
             return bot;
         }
