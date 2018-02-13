@@ -39,6 +39,7 @@ namespace OsEngine.OsTrader.Panels
             private StrategyParameterString Regime; // BotTradeRegime
 
             private readonly MovingAverage sma;
+            private readonly Atr atr;
 
             private StrategyParameterInt Volume1;
             private StrategyParameterInt Volume2;
@@ -54,21 +55,27 @@ namespace OsEngine.OsTrader.Panels
             public StrategyParameterInt Slippage;
             public StrategyParameterInt Stoploss;
 
+            public StrategyParameterInt AtrLength;
+            public StrategyParameterInt AtrFilter;
+
             public TunnelRobot(string name)
                 : base(name)
             {
                 this.Regime = CreateParameter("Regime", Enum.GetName(typeof(BotTradeRegime), BotTradeRegime.Off), Enum.GetNames(typeof(BotTradeRegime)));
                 this.Profit1 = CreateParameter("Profit1", 0.15m, 0.10m, 1.0m, 0.01m);
-                this.Profit2 = CreateParameter("Profit2", 0.20m, 0.10m, 1.0m, 0.01m);
-                this.Profit3 = CreateParameter("Profit3", 0.25m, 0.10m, 1.0m, 0.01m);
+                this.Profit2 = CreateParameter("Profit2", 0.25m, 0.10m, 1.0m, 0.01m);
+                this.Profit3 = CreateParameter("Profit3", 0.35m, 0.10m, 1.0m, 0.01m);
                 this.Slippage = CreateParameter("Slippage", 1, 1, 100, 1);
-                this.TunnelLength = CreateParameter("Tunnel.Length", 30, 20, 200, 5);
-                this.TunnelWidth = CreateParameter("Tunnel.Width", 60, 20, 300, 10);
+                this.TunnelLength = CreateParameter("Tunnel.Length", 20, 20, 200, 5);
+                this.TunnelWidth = CreateParameter("Tunnel.Width", 30, 20, 300, 10);
                 this.Stoploss = CreateParameter("Stoploss", 90, 5, 100, 5);
-                this.Volume1 = CreateParameter("Volume1", 3, 1, 3, 1);
-                this.Volume2 = CreateParameter("Volume2", 2, 1, 3, 1);
+                this.Volume1 = CreateParameter("Volume1", 2, 1, 3, 1);
+                this.Volume2 = CreateParameter("Volume2", 1, 1, 3, 1);
                 this.Volume3 = CreateParameter("Volume3", 1, 1, 3, 1);
-                this.Volume4 = CreateParameter("Volume4", 2, 1, 3, 1);
+                this.Volume4 = CreateParameter("Volume4", 1, 1, 3, 1);
+
+                this.AtrLength = CreateParameter("Atr.Length", 8, 5, 50, 1);
+                this.AtrFilter = CreateParameter("Atr.Filter", 21, 10, 50, 1);
 
                 TabCreate(BotTabType.Simple);
                 this.bot = this.TabsSimple[0];
@@ -82,6 +89,13 @@ namespace OsEngine.OsTrader.Panels
                 };
                 this.sma = (MovingAverage)this.bot.CreateCandleIndicator(this.sma, "Prime");
                 this.sma.Save();
+
+                this.atr = new Atr(name + "ATR", false)
+                {
+                    Lenght = this.AtrLength.ValueInt
+                };
+                this.atr = (Atr)this.bot.CreateCandleIndicator(this.atr, "AtrAre");
+                this.atr.Save();
 
                 this.bot.CandleFinishedEvent += this.OnCandleFinishedEvent;
                 this.bot.PositionOpeningSuccesEvent += this.OnPositionOpeningSuccesEvent;
@@ -97,6 +111,13 @@ namespace OsEngine.OsTrader.Panels
                     this.sma.Lenght = this.TunnelLength.ValueInt;
                     this.sma.Save();
                     this.sma.Reload();
+                }
+
+                if (this.atr.Lenght != this.AtrLength.ValueInt)
+                {
+                    this.atr.Lenght = this.AtrLength.ValueInt;
+                    this.atr.Save();
+                    this.atr.Reload();
                 }
             }
 
@@ -207,6 +228,11 @@ namespace OsEngine.OsTrader.Panels
                 decimal profit1 = decimal.Multiply(smaValue, this.Profit1.ValueDecimal / 100m);
                 decimal profit2 = decimal.Multiply(smaValue, this.Profit2.ValueDecimal / 100m);
                 decimal profit3 = decimal.Multiply(smaValue, this.Profit3.ValueDecimal / 100m);
+
+                decimal atrValue = this.atr.Values.Last();
+
+                if (atrValue < this.AtrFilter.ValueInt)
+                    return;
 
                 if (lastCandle.High >= tunnelUp)
                 {
