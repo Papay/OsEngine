@@ -273,8 +273,8 @@ namespace OsEngine.OsTrader.Panels
             /// логика закрытия позиции
             /// </summary>
             /// <param name="candles"></param>
-            /// <param name="openPosition"></param>
-            private void LogicClosePosition(List<Candle> candles, Position openPosition)
+            /// <param name="position"></param>
+            private void LogicClosePosition(List<Candle> candles, Position position)
             {
                 Candle lastCandle = candles.Last();
                 decimal smaValue = this.sma.Values.Last();
@@ -286,67 +286,59 @@ namespace OsEngine.OsTrader.Panels
                 decimal profit2 = decimal.Multiply(smaValue, this.Profit2.ValueDecimal / 100m);
                 decimal profit3 = decimal.Multiply(smaValue, this.Profit3.ValueDecimal / 100m);
 
-                switch (openPosition.Direction)
+                switch (position.Direction)
                 {
                     case Side.Buy:
                         decimal longStopPrice = tunnelUp - this.TunnelWidth.ValueInt * (this.Stoploss.ValueInt / 100m);
-                        switch (openPosition.SignalTypeOpen)
+                        switch (position.SignalTypeOpen)
                         {
                             case "L1":
                                 if (lastCandle.High >= tunnelUp + profit1)
-                                    this.bot.CloseAtTrailingStop(openPosition, tunnelUp + profit1, tunnelUp + profit1 - slippage);
+                                    this.bot.CloseAtTrailingStop(position, tunnelUp + profit1, tunnelUp + profit1 - slippage);
                                 else
-                                    this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
+                                    this.bot.CloseAtStop(position, longStopPrice, longStopPrice - slippage);
                                 break;
                             case "L2":
                                 if (lastCandle.High >= tunnelUp + profit2)
-                                    this.bot.CloseAtTrailingStop(openPosition, tunnelUp + profit2, tunnelUp + profit2 - slippage);
+                                    this.bot.CloseAtTrailingStop(position, tunnelUp + profit2, tunnelUp + profit2 - slippage);
                                 else
-                                    this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
+                                    this.bot.CloseAtStop(position, longStopPrice, longStopPrice - slippage);
                                 break;
                             case "L3":
                                 if (lastCandle.High >= tunnelUp + profit3)
-                                    this.bot.CloseAtTrailingStop(openPosition, tunnelUp + profit3, tunnelUp + profit3 - slippage);
+                                    this.bot.CloseAtTrailingStop(position, tunnelUp + profit3, tunnelUp + profit3 - slippage);
                                 else
-                                    this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
-                                break;
-                            case "L4":
-                                this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
+                                    this.bot.CloseAtStop(position, longStopPrice, longStopPrice - slippage);
                                 break;
                             default:
-                                //throw new InvalidOperationException($"Unexpectted long position with signal type open: {openPosition.SignalTypeOpen}");
-                                this.bot.CloseAtStop(openPosition, longStopPrice, longStopPrice - slippage);
+                                this.bot.CloseAtStop(position, longStopPrice, longStopPrice - slippage);
                                 break;
                         }
                         break;
                     case Side.Sell:
                         decimal shortStopPrice = tunnelDown + this.TunnelWidth.ValueInt * (this.Stoploss.ValueInt / 100m);
-                        switch (openPosition.SignalTypeOpen)
+                        switch (position.SignalTypeOpen)
                         {
                             case "L1":
                                 if (lastCandle.Low < tunnelDown - profit1)
-                                    this.bot.CloseAtTrailingStop(openPosition, tunnelDown - profit1, tunnelDown - profit1 + slippage);
+                                    this.bot.CloseAtTrailingStop(position, tunnelDown - profit1, tunnelDown - profit1 + slippage);
                                 else
-                                    this.bot.CloseAtStop(openPosition, shortStopPrice, shortStopPrice + slippage);
+                                    this.bot.CloseAtStop(position, shortStopPrice, shortStopPrice + slippage);
                                 break;
                             case "L2":
                                 if (lastCandle.Low < tunnelDown - profit2)
-                                    this.bot.CloseAtTrailingStop(openPosition, tunnelDown - profit2, tunnelDown - profit2 + slippage);
+                                    this.bot.CloseAtTrailingStop(position, tunnelDown - profit2, tunnelDown - profit2 + slippage);
                                 else
-                                    this.bot.CloseAtStop(openPosition, shortStopPrice, shortStopPrice + slippage);
+                                    this.bot.CloseAtStop(position, shortStopPrice, shortStopPrice + slippage);
                                 break;
                             case "L3":
                                 if (lastCandle.Low < tunnelDown - profit3)
-                                    this.bot.CloseAtTrailingStop(openPosition, tunnelDown - profit3, tunnelDown - profit3 + slippage);
+                                    this.bot.CloseAtTrailingStop(position, tunnelDown - profit3, tunnelDown - profit3 + slippage);
                                 else
-                                    this.bot.CloseAtStop(openPosition, shortStopPrice, shortStopPrice + slippage);
-                                break;
-                            case "L4":
-                                this.bot.CloseAtStop(openPosition, shortStopPrice, shortStopPrice + slippage);
+                                    this.bot.CloseAtStop(position, shortStopPrice, shortStopPrice + slippage);
                                 break;
                             default:
-                                //throw new InvalidOperationException($"Unexpectted short position with signal type open: {openPosition.SignalTypeOpen}");
-                                this.bot.CloseAtStop(openPosition, shortStopPrice, shortStopPrice + slippage);
+                                this.bot.CloseAtStop(position, shortStopPrice, shortStopPrice + slippage);
                                 break;
                         }
                         break;
